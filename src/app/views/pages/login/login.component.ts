@@ -17,7 +17,7 @@ import {
   FormControlDirective,
   ButtonDirective,
 } from '@coreui/angular';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { jwtDecode } from 'jwt-decode';
 import { FormBuilder, Validators } from '@angular/forms';
@@ -46,35 +46,34 @@ import { AuthService } from '../../../services/auth.service';
   ],
 })
 export class LoginComponent {
-  loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-  });
-
+  loginForm!: FormGroup; // Declare type but don't initialize here
   loading = false;
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+    });
+  }
 
   onSubmit() {
-    const credentials = {
-      email: this.loginForm.get('email')?.value || '',
-      password: this.loginForm.get('password')?.value || '',
-    };
-    console.log(
-      'Login credentials:',
-      credentials.email + '  ' + this.loginForm.invalid
-    );
+    const { email, password } = this.loginForm.value;
 
-    if (this.loginForm.invalid) return;
+    console.log('Login credentials:', email + '  ' + password);
+
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
     console.log('Form is valid, proceeding with login');
 
     this.loading = true;
 
     console.log('Form submitted:', this.loginForm.value);
-    this.authService.login(credentials.email, credentials.password).subscribe({
+    this.authService.login(email, password).subscribe({
       next: (res) => {
         const token = res.token;
         this.authService.setToken(token);
@@ -90,6 +89,7 @@ export class LoginComponent {
         const role = decoded?.user?.role || 'default';
         this.router.navigate([`/${role}`]);
         this.loading = false;
+        console.log('localStorage login ', localStorage);
       },
       error: (err) => {
         alert('Login failed: ' + err.error.message);

@@ -1,7 +1,8 @@
 // auth.service.ts
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { CanActivate, Router } from '@angular/router';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 interface LoginCredentials {
   email: string;
@@ -19,53 +20,54 @@ export class AuthService {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
     }),
-    withCredentials: true,
+    withCredentials: false, // Changed to false if you don't need credentials
   };
+
+  private authStatus = new BehaviorSubject<boolean>(this.hasToken());
+  authStatus$ = this.authStatus.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  // login(credentials: LoginCredentials): Observable<LoginResponse> {
-  //   return this.http.post<LoginResponse>(
-  //     `${this.apiUrl}/auth/login`,
-  //     credentials,
-  //     this.httpOptions
-  //   );
-  // }
-  // login(email: string, password: string): Observable<any> {
-  //   const body = { email, password };
-
-  //   return this.http.post('http://localhost:5000/api/auth/login', body, {
-  //     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-  //     withCredentials: true, // important if backend uses cookies
-  //   });
-  // }
-
-  login(email: string, password: string): Observable<any> {
+  login(email: string, password: string): Observable<LoginResponse> {
     const body = { email, password };
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/auth/login`,
+      body,
+      this.httpOptions
+    );
+  }
 
-    console.log('Sending login request with:', body);
-
-    return this.http.post('http://localhost:5000/api/auth/login', body, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-      withCredentials: true,
-      observe: 'response', // <- to inspect full HTTP response
-    });
+  private hasToken(): boolean {
+    return !!localStorage.getItem('token');
   }
 
   setToken(token: string): void {
     localStorage.setItem('token', token);
+    this.authStatus.next(true);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('isAuthenticated');
+    console.log('localStorage cleared' + localStorage);
+
+    this.authStatus.next(false);
   }
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanActivate {
+  constructor(private auth: AuthService, private router: Router) {}
+
+  canActivate(): boolean {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return false;
+    }
+    return true;
   }
 }
