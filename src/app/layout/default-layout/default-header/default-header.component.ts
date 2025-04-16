@@ -50,7 +50,7 @@ export class DefaultHeaderComponent extends HeaderComponent {
   }
 
   sidebarId = input('sidebar1');
-
+  
   public newMessages = [
     {
       id: 0,

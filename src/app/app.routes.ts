@@ -19,12 +19,28 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        component: UsersListComponent,
+        loadChildren: () =>
+          import('./views/users-list/routes').then((m) => m.routes),
       },
       {
-        path: 'dashboard',
+        path: 'projects',
         loadChildren: () =>
-          import('./views/dashboard/routes').then((m) => m.routes),
+          import('./views/project-list/routes').then((m) => m.routes),
+      },
+      {
+        path: 'skills',
+        loadChildren: () =>
+          import('./views/skills-list/routes').then((m) => m.routes),
+      },
+      {
+        path: 'tasks',
+        loadChildren: () =>
+          import('./views/tasks-list/routes').then((m) => m.routes),
+      },
+      {
+        path: 'calendar',
+        loadChildren: () =>
+          import('./views/calendar/routes').then((m) => m.routes),
       },
       {
         path: 'theme',

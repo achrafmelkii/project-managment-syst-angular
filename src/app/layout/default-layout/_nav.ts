@@ -21,17 +21,17 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Liste des Projets',
-    url: '/dashboard',
+    url: '/projects',
     iconComponent: { name: 'cil-briefcase' },
   },
   {
     name: 'Liste des Competences',
-    url: '/dashboard',
+    url: '/skills',
     iconComponent: { name: 'cil-key-alt' },
   },
   {
     name: 'calandrier',
-    url: '/dashboard',
+    url: '/calendar',
     iconComponent: { name: 'cil-calendar-toda' },
   },
   {

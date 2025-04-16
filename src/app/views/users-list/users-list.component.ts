@@ -13,7 +13,6 @@ import {
   TableColorDirective,
   TableActiveDirective,
   BorderDirective,
-  AlignDirective,
   ButtonDirective,
 } from '@coreui/angular';
 
@@ -32,7 +31,7 @@ import {
     TableColorDirective,
     TableActiveDirective,
     BorderDirective,
-    AlignDirective,
+
     ButtonDirective,
   ],
   templateUrl: './users-list.component.html',
