@@ -59,6 +59,15 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    const hasToken = this.authService.hasToken();
+    console.log('Has token:', hasToken);
+    if (hasToken) {
+      console.log('User is authenticated');
+    } else {
+      console.log('User is not authenticated');
+    }
+  }
   onSubmit() {
     const { email, password } = this.loginForm.value;
 
@@ -86,8 +95,10 @@ export class LoginComponent {
         );
 
         const decoded: any = jwtDecode(token);
-        const role = decoded?.user?.role || 'default';
-        this.router.navigate([`/${role}`]);
+        const role = decoded?.user?.role || 'EMPLOYEE';
+        this.authService.setUserRole(role);
+        console.log('role :', role);
+        this.router.navigate([`/${role}/dashboard`]);
         this.loading = false;
         console.log('localStorage login ', localStorage);
       },

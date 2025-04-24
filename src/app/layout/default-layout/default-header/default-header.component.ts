@@ -72,11 +72,15 @@ export class DefaultHeaderComponent extends HeaderComponent {
     super();
   }
 
-  logout() {
-    this.authService.logout();
-    console.log('localStorage logout' + localStorage);
+  logout(): void {
+    console.log('Token before logout:', localStorage.getItem('token'));
 
-    // this.router.navigate(['/login']); // Redirect to login or home
+    this.authService.logout();
+
+    const tokenExists = this.authService.hasToken();
+    console.log('Token after logout:', tokenExists);
+
+    this.router.navigate(['/login']); // Redirect if needed
   }
 
   sidebarId = input('sidebar1');

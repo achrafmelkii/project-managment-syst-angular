@@ -12,9 +12,6 @@ import {
   useAnimation
 } from "./chunk-B5OA6MLV.js";
 import {
-  IconDirective
-} from "./chunk-KDJ2ZSNT.js";
-import {
   Platform,
   _bindEventWithOptions,
   _getEventTarget,
@@ -37,6 +34,9 @@ import {
   takeUntilDestroyed,
   toObservable
 } from "./chunk-OZJ3UN6Q.js";
+import {
+  IconDirective
+} from "./chunk-KDJ2ZSNT.js";
 import "./chunk-PLL7GVWM.js";
 import "./chunk-VCHRZW6F.js";
 import {
@@ -169,12 +169,12 @@ import {
   ɵɵviewQuery,
   ɵɵviewQuerySignal
 } from "./chunk-EN5Z2UFI.js";
-import "./chunk-PEBH6BBU.js";
 import {
   fromEvent,
   isObservable,
   merge
 } from "./chunk-WPM5VTLQ.js";
+import "./chunk-PEBH6BBU.js";
 import {
   BehaviorSubject,
   Observable,

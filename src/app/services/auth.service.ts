@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { UserRole } from '../layout';
 
 interface LoginCredentials {
   email: string;
@@ -37,7 +38,19 @@ export class AuthService {
     );
   }
 
-  private hasToken(): boolean {
+  getUserRole(): UserRole {
+    // Add console.log to debug
+    const role = localStorage.getItem('userRole') as UserRole;
+    console.log('Current user role:', role);
+    return role || 'EMPLOYEE'; // Default to EMPLOYEE if no role found
+  }
+
+  // Make sure to set the role when user logs in
+  setUserRole(role: UserRole): void {
+    localStorage.setItem('userRole', role);
+  }
+
+  hasToken(): boolean {
     return !!localStorage.getItem('token');
   }
 
@@ -49,9 +62,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('isAuthenticated');
-    console.log('localStorage cleared' + localStorage);
+    console.log('Token and auth status removed from localStorage');
 
-    this.authStatus.next(false);
+    this.authStatus.next(false); // Notify other parts of the app
   }
 
   isLoggedIn(): boolean {

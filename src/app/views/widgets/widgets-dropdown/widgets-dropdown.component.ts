@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { getStyle } from '@coreui/utils';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { UserService } from '../../../services/user.service';
 import {
@@ -25,6 +25,8 @@ import {
   DropdownItemDirective,
   DropdownDividerDirective,
 } from '@coreui/angular';
+import { AuthService } from '../../../services/auth.service';
+import { routes } from '../routes';
 
 @Component({
   selector: 'app-widgets-dropdown',
@@ -48,10 +50,12 @@ import {
     ChartjsComponent,
   ],
 })
-export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
+export class WidgetsDropdownComponent implements OnInit {
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   totalUsers: number = 0;
@@ -163,16 +167,23 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   };
 
   ngOnInit(): void {
-    this.setData();
+    const hasToken = this.authService.hasToken();
+    console.log('Has token:', hasToken);
+    if (hasToken) {
+      console.log('User is authenticated');
+    } else {
+      console.log('User is not authenticated');
+      this.router.navigate(['/login']);
+    }
+
+    // this.setData();
     this.fetchUsersCount();
   }
 
   fetchUsersCount() {
     this.userService.getUsersList({}).subscribe({
       next: (response) => {
-        // Assuming your API returns something like { users: [], total: 42 }
-        // this.totalUsers = response.length || response.users?.length || 0;
-        this.totalUsers = response.length;
+        this.totalUsers = response.countUsers || 0;
         console.log('Total Users:', this.totalUsers);
       },
       error: (error) => {
@@ -180,6 +191,7 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
       },
     });
   }
+
   ngAfterContentInit(): void {
     this.changeDetectorRef.detectChanges();
   }

@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 
 import { IconDirective } from '@coreui/icons-angular';
 import {
   ContainerComponent,
+  INavData,
   ShadowOnScrollDirective,
   SidebarBrandComponent,
   SidebarComponent,
@@ -12,11 +13,12 @@ import {
   SidebarHeaderComponent,
   SidebarNavComponent,
   SidebarToggleDirective,
-  SidebarTogglerDirective
+  SidebarTogglerDirective,
 } from '@coreui/angular';
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
+import { AuthService } from '../../services/auth.service';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -44,9 +46,26 @@ function isOverflown(element: HTMLElement) {
     NgScrollbar,
     RouterOutlet,
     RouterLink,
-    ShadowOnScrollDirective
-  ]
+    ShadowOnScrollDirective,
+  ],
 })
-export class DefaultLayoutComponent {
-  public navItems = [...navItems];
+export class DefaultLayoutComponent implements OnInit {
+  // old
+  // public navItems = [...navItems];
+
+  public navItems: INavData[] = [];
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    const userRole = this.authService.getUserRole();
+    console.log('Nav items before:', this.navItems);
+    console.log('User role:', userRole);
+    console.log('Available nav items:', navItems);
+
+    this.navItems = navItems[userRole] || [];
+
+    console.log('Nav items after:', this.navItems);
+  }
 }
+export type UserRole = 'employee' | 'manager' | 'responsible';

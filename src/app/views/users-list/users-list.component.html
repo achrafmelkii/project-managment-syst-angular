@@ -1,57 +1,132 @@
 <c-col xs="12">
-    <c-card class="mb-4">
-      <c-card-header>
-        <strong>Angular Table</strong>
-      </c-card-header>
-      <c-card-body>
-        <p class="text-body-secondary small">
-          Using the most basic table CoreUI, here&#39;s how <code>cTable</code>-based
-          tables look in CoreUI.
-        </p>
-        
-          <table cTable>
-            <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Class</th>
-              <th scope="col">Heading</th>
-              <th scope="col">Heading</th>
-              <th scope="col">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>&#64;mdo</td>
-              <td>
-                <div class="d-md-flex mx-auto">
-                    <div class="d-flex gap-2">
-                        <button cButton color="primary" >Button</button>
-                        <button cButton color="primary" >Button</button>
-                        
-                      </div>
-                  </div>
-               
-              </td>
+  <c-card class="mb-4">
+    <c-card-header>
+      <strong>Users Table</strong>
+    </c-card-header>
+    <c-card-body style="position: relative;">
+      <p class="text-body-secondary small">
+        Displaying user information dynamically
+      </p>
+      <button cButton color="primary" style="position: absolute; top: 10px; right: 100px;" (click)="openCreateUserModal()">Add User</button>
+      <table cTable>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let i = index">
+            <th scope="row">{{ i + 1 }}</th>
+            <td>{{ user.firstName }} {{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+         
+            <td>
+              <div class="d-md-flex mx-auto">
+                <div class="d-flex gap-2">
+                  <button cButton color="primary" (click)="onViewUser(user)">View</button>
+                  <button cButton color="danger" (click)="deleteUser(user)">Delete</button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>&#64;fat</td>
-              <td>&#64;fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td colSpan="2">Larry the Bird</td>
-              <td>&#64;twitter</td>
-            </tr>
-            </tbody>
-          </table>
-        
-      </c-card-body>
-    </c-card>
-  </c-col>
+      
+      <div *ngIf="isEditWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+        <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
+          <h3>Edit User</h3>
+          <form cForm>
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilUser"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="selectedUser.firstName" name="firstName" placeholder="firstName" />
+            </c-input-group>
+
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilUser"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="selectedUser.lastName" name="lastName" placeholder="lastName" />
+            </c-input-group>
+      
+            <c-input-group class="mb-3">
+              <span cInputGroupText>&#64;</span>
+              <input cFormControl [(ngModel)]="selectedUser.email" name="email" placeholder="Email" />
+            </c-input-group>
+      
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="selectedUser.role" name="role" placeholder="role" />
+            </c-input-group>
+      
+            <div class="d-flex justify-content-end gap-2">
+              <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
+              <button cButton color="success" (click)="onSaveChanges()" type="button">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+
+      <div *ngIf="isCreateWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+        <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
+          <h3>Create New User</h3>
+          <form cForm>
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilUser"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="newUser.firstName" name="firstName" placeholder="First Name" required />
+            </c-input-group>
+
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilUser"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="newUser.lastName" name="lastName" placeholder="Last Name" required />
+            </c-input-group>
+
+            <c-input-group class="mb-3">
+              <span cInputGroupText>&#64;</span>
+              <input cFormControl [(ngModel)]="newUser.email" name="email" placeholder="Email" type="email" required />
+            </c-input-group>
+
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="newUser.password" name="password" placeholder="Password" type="password" required />
+            </c-input-group>
+
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilBriefcase"></svg>
+              </span>
+              <select cSelect [(ngModel)]="newUser.role" name="role" required>
+                <option value="" disabled>Select Role</option>
+                <option value="employee">employee</option>
+                <option value="responsible">Responsible</option>
+                <option value="manager">manager</option>
+              </select>
+            </c-input-group>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
+              <button cButton color="success"  (click)="createUser()">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </c-card-body>
+  </c-card>
+</c-col>
