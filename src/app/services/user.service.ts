@@ -42,19 +42,32 @@ export class UserService {
   }
 
   getManagerList(filter: { page?: number }): Observable<any> {
-    let params = new HttpParams();
-    if (filter.page !== undefined)
-      params = params.set('page', filter.page.toString());
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get(`${this.apiUrl}/users/manager`, { params });
+    return this.http.get(`${this.apiUrl}/users/manager`, {
+      // params,
+      headers,
+    });
   }
+  // getManagerList(filter: { page?: number }): Observable<any> {
+  //   const token = localStorage.getItem('token') || '';
+  //   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+  //   return this.http.get(`${this.apiUrl}/users/manager`, {
+  //     params,
+  //     headers,
+  //   });
+  // }
 
   getEmployeList(filter: { page?: number }): Observable<any> {
-    let params = new HttpParams();
-    if (filter.page !== undefined)
-      params = params.set('page', filter.page.toString());
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get(`${this.apiUrl}/users/employe`, { params });
+    return this.http.get(`${this.apiUrl}/users/employe`, {
+      // params,
+      headers,
+    });
   }
 
   createUser(user: any): Observable<any> {

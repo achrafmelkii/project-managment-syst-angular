@@ -59,6 +59,8 @@ export class WidgetsDropdownComponent implements OnInit {
   ) {}
 
   totalUsers: number = 0;
+  totalManagers: number = 0;
+  totalEmployees: number = 0;
   data: any[] = [];
   options: any[] = [];
   labels = [
@@ -178,6 +180,8 @@ export class WidgetsDropdownComponent implements OnInit {
 
     // this.setData();
     this.fetchUsersCount();
+    this.fetchManagersCount();
+    this.fetchEmployeesCount();
   }
 
   fetchUsersCount() {
@@ -185,6 +189,29 @@ export class WidgetsDropdownComponent implements OnInit {
       next: (response) => {
         this.totalUsers = response.countUsers || 0;
         console.log('Total Users:', this.totalUsers);
+      },
+      error: (error) => {
+        console.error('Failed to fetch users:', error);
+      },
+    });
+  }
+
+  fetchManagersCount() {
+    this.userService.getManagerList({}).subscribe({
+      next: (response) => {
+        this.totalManagers = response.countUsers || 0;
+        console.log('Total maangers:', this.totalManagers);
+      },
+      error: (error) => {
+        console.error('Failed to fetch users:', error);
+      },
+    });
+  }
+  fetchEmployeesCount() {
+    this.userService.getEmployeList({}).subscribe({
+      next: (response) => {
+        this.totalEmployees = response.countUsers || 0;
+        console.log('Total employees:', this.totalEmployees);
       },
       error: (error) => {
         console.error('Failed to fetch users:', error);

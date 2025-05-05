@@ -114,8 +114,15 @@ export const routes: Routes = [
           {
             path: 'projects',
             loadChildren: () =>
-              import('./views/project-list/routes').then((m) => m.routes),
+              import('./views/manager-project-list/routes').then(
+                (m) => m.routes
+              ),
           },
+          //  {
+          //   path: 'projects',
+          //   loadChildren: () =>
+          //     import('./views/project-list/routes').then((m) => m.routes),
+          // },
           {
             path: 'skills',
             loadChildren: () =>

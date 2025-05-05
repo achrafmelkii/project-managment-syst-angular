@@ -1,0 +1,36 @@
+<div class="table-container">
+    <input type="text" (input)="handleSearch($event)" placeholder="Search projects..." />
+    <table *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>Project Name</th>
+          <th>Manager</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Created At</th>
+          </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let project of projects">
+          <td>{{ project.name }}</td>
+          <td>
+            {{ project.manager.firstName }} {{ project.manager.lastName }}
+          </td>
+          <td>{{ project.startDate | date }}</td>
+          <td>{{ project.endDate | date }}</td>
+          <td>{{ project.createdAt | date }}</td>
+          </tr>
+      </tbody>
+    </table>
+    <div *ngIf="loading">Loading...</div>
+  </div>
+  <div class="pagination">
+    <button
+      *ngFor="let page of pagesArray"
+      (click)="setPage(page)"
+      [ngClass]="{'active': currentPage === page}"
+    >
+      {{ page }}
+    </button>
+  </div>
+  
