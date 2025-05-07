@@ -1,36 +1,124 @@
-<div class="table-container">
-    <input type="text" (input)="handleSearch($event)" placeholder="Search projects..." />
-    <table *ngIf="!loading">
-      <thead>
-        <tr>
-          <th>Project Name</th>
-          <th>Manager</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Created At</th>
+<c-col xs="12">
+  <c-card class="mb-4">
+    <c-card-header>
+      <strong>Projects Table</strong>
+    </c-card-header>
+    <c-card-body style="position: relative;">
+      <p class="text-body-secondary small">
+        Displaying project information dynamically
+      </p>
+
+      <button cButton color="primary" style="position: absolute; top: 10px; right: 100px;" (click)="openCreateProjectModal()">
+        Add Project
+      </button>
+
+      <c-input-group class="mb-3" style="max-width: 300px;">
+        <span cInputGroupText>
+          <svg cIcon name="cilSearch"></svg>
+        </span>
+        <input cFormControl type="text" (input)="handleSearch($event)" placeholder="Search projects..." />
+      </c-input-group>
+
+      <table cTable>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Project Name</th>
+            <th>Manager</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Created At</th>
+            <th>Action</th>
           </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let project of projects">
-          <td>{{ project.name }}</td>
-          <td>
-            {{ project.manager.firstName }} {{ project.manager.lastName }}
-          </td>
-          <td>{{ project.startDate | date }}</td>
-          <td>{{ project.endDate | date }}</td>
-          <td>{{ project.createdAt | date }}</td>
+        </thead>
+        <tbody>
+          <tr *ngFor="let project of projects; let i = index">
+            <th scope="row">{{ i + 1 }}</th>
+            <td>{{ project.name }}</td>
+            <td>{{ project.manager.firstName }} {{ project.manager.lastName }}</td>
+            <td>{{ project.startDate | date }}</td>
+            <td>{{ project.endDate | date }}</td>
+            <td>{{ project.createdAt | date }}</td>
+            <td>
+              <div class="d-md-flex mx-auto">
+                <div class="d-flex gap-2">
+                  <button cButton color="primary" (click)="onViewProject(project)">View</button>
+                  <button cButton color="danger" (click)="deleteProject(project)">Delete</button>
+                </div>
+              </div>
+            </td>
           </tr>
-      </tbody>
-    </table>
-    <div *ngIf="loading">Loading...</div>
-  </div>
-  <div class="pagination">
-    <button
-      *ngFor="let page of pagesArray"
-      (click)="setPage(page)"
-      [ngClass]="{'active': currentPage === page}"
-    >
-      {{ page }}
-    </button>
-  </div>
-  
+        </tbody>
+      </table>
+
+      <div *ngIf="loading" class="text-center mt-3">
+        <c-spinner color="primary" label="Loading..."></c-spinner>
+      </div>
+
+      <div class="d-flex justify-content-center mt-3">
+        <div class="d-flex gap-2">
+          <button
+            *ngFor="let page of pagesArray"
+            (click)="setPage(page)"
+            cButton
+            [color]="currentPage === page ? 'primary' : 'secondary'"
+          >
+            {{ page }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="isCreateWidgetVisible"
+      class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+      style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+   <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
+     <h3>Create New Project</h3>
+     <form [formGroup]="createProjectForm">
+       <c-input-group class="mb-3">
+         <span cInputGroupText>
+           <svg cIcon name="cilFolder"></svg>
+         </span>
+         <input cFormControl formControlName="name" placeholder="Project Name" required />
+       </c-input-group>
+ 
+       <c-input-group class="mb-3">
+         <span cInputGroupText>
+           <svg cIcon name="cilCalendar"></svg>
+         </span>
+         <input cFormControl formControlName="startDate" type="date" placeholder="Start Date" />
+       </c-input-group>
+ 
+       <c-input-group class="mb-3">
+         <span cInputGroupText>
+           <svg cIcon name="cilCalendar"></svg>
+         </span>
+         <input cFormControl formControlName="endDate" type="date" placeholder="End Date" />
+       </c-input-group>
+ 
+       <c-input-group class="mb-3">
+         <span cInputGroupText>
+           <svg cIcon name="cilList"></svg>
+         </span>
+         <select cFormControl formControlName="status" class="form-select">
+           <option value="Ouvert">Ouvert</option>
+           <option value="Fermé">Fermé</option>
+         </select>
+       </c-input-group>
+ 
+       <c-input-group class="mb-3">
+         <span cInputGroupText>
+           <svg cIcon name="cilDescription"></svg>
+         </span>
+         <textarea cFormControl formControlName="description" placeholder="Description" rows="3"></textarea>
+       </c-input-group>
+ 
+       <div class="d-flex justify-content-end gap-2">
+         <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
+         <button cButton color="success" type="button" (click)="createProject()">Create</button>
+       </div>
+     </form>
+   </div>
+ </div>
+ 
+    </c-card-body>
+  </c-card>
+</c-col>

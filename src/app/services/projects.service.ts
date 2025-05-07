@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ProjectsService {
-  private apiUrl = '/projects'; //  Base URL for your projects API
+  private apiUrl = 'http://localhost:5000/api'; //  Base URL for your projects API
 
   constructor(private http: HttpClient) {}
 
@@ -21,7 +21,7 @@ export class ProjectsService {
     if (filter.page) {
       params = params.set('page', filter.page.toString());
     }
-    return this.http.get(this.apiUrl, { params, headers });
+    return this.http.get(`${this.apiUrl}/projects`, { params, headers });
   }
   //added
   getProjectById(id: string): Observable<any> {

@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: '',
     data: {
-      title: 'projects',
+      title: 'Responsible projects',
     },
     loadComponent: () =>
       import('./manager-project-list.component').then(
