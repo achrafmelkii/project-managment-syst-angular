@@ -59,9 +59,19 @@ export class AuthService {
     this.authStatus.next(true);
   }
 
+  setUserID(userId: string): void {
+    localStorage.setItem('userId', userId);
+  }
+
+  getUserId(): string {
+    return localStorage.getItem('userId') || '';
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
     console.log('Token and auth status removed from localStorage');
 
     this.authStatus.next(false); // Notify other parts of the app

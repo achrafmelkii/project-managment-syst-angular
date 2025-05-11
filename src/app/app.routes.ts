@@ -5,91 +5,7 @@ import { UsersListComponent } from './views/users-list/users-list.component';
 import { AuthGuard } from './services/auth.service';
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  // { path: 'login', component: LoginComponent },
-  // {
-  //   path: '',
-  //   component: DefaultLayoutComponent,
-  //   data: {
-  //     title: 'Home',
-  //   },
-  //   children: [
-  //     {
-  //       path: 'dashboard',
-  //       loadChildren: () =>
-  //         import('./views/dashboard/routes').then((m) => m.routes),
-  //       canActivate: [AuthGuard],
-  //     },
-  //     {
-  //       path: 'users',
-  //       loadChildren: () =>
-  //         import('./views/users-list/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'projects',
-  //       loadChildren: () =>
-  //         import('./views/project-list/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'skills',
-  //       loadChildren: () =>
-  //         import('./views/skills-list/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'tasks',
-  //       loadChildren: () =>
-  //         import('./views/tasks-list/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'calendar',
-  //       loadChildren: () =>
-  //         import('./views/calendar/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'theme',
-  //       loadChildren: () =>
-  //         import('./views/theme/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'base',
-  //       loadChildren: () => import('./views/base/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'buttons',
-  //       loadChildren: () =>
-  //         import('./views/buttons/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'forms',
-  //       loadChildren: () =>
-  //         import('./views/forms/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'icons',
-  //       loadChildren: () =>
-  //         import('./views/icons/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'notifications',
-  //       loadChildren: () =>
-  //         import('./views/notifications/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'widgets',
-  //       loadChildren: () =>
-  //         import('./views/widgets/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'charts',
-  //       loadChildren: () =>
-  //         import('./views/charts/routes').then((m) => m.routes),
-  //     },
-  //     {
-  //       path: 'pages',
-  //       loadChildren: () =>
-  //         import('./views/pages/routes').then((m) => m.routes),
-  //     },
-  //   ],
-  // },
+
   {
     path: '',
     component: DefaultLayoutComponent,
@@ -105,11 +21,6 @@ export const routes: Routes = [
             loadChildren: () =>
               import('./views/dashboard/routes').then((m) => m.routes),
           },
-          {
-            path: 'users',
-            loadChildren: () =>
-              import('./views/users-list/routes').then((m) => m.routes),
-          },
 
           {
             path: 'projects',
@@ -118,16 +29,12 @@ export const routes: Routes = [
                 (m) => m.routes
               ),
           },
-          //  {
-          //   path: 'projects',
-          //   loadChildren: () =>
-          //     import('./views/project-list/routes').then((m) => m.routes),
-          // },
           {
-            path: 'skills',
+            path: 'profile',
             loadChildren: () =>
-              import('./views/skills-list/routes').then((m) => m.routes),
+              import('./views/profile/routes').then((m) => m.routes),
           },
+
           {
             path: 'tasks',
             loadChildren: () =>
@@ -174,6 +81,11 @@ export const routes: Routes = [
               import('./views/tasks-list/routes').then((m) => m.routes),
           },
           {
+            path: 'profile',
+            loadChildren: () =>
+              import('./views/profile/routes').then((m) => m.routes),
+          },
+          {
             path: 'calendar',
             loadChildren: () =>
               import('./views/calendar/routes').then((m) => m.routes),
@@ -190,26 +102,22 @@ export const routes: Routes = [
             loadChildren: () =>
               import('./views/dashboard/routes').then((m) => m.routes),
           },
-          {
-            path: 'users',
-            loadChildren: () =>
-              import('./views/users-list/routes').then((m) => m.routes),
-          },
 
           {
             path: 'projects',
             loadChildren: () =>
               import('./views/project-list/routes').then((m) => m.routes),
           },
-          {
-            path: 'skills',
-            loadChildren: () =>
-              import('./views/skills-list/routes').then((m) => m.routes),
-          },
+
           {
             path: 'tasks',
             loadChildren: () =>
               import('./views/tasks-list/routes').then((m) => m.routes),
+          },
+          {
+            path: 'profile',
+            loadChildren: () =>
+              import('./views/profile/routes').then((m) => m.routes),
           },
           {
             path: 'calendar',

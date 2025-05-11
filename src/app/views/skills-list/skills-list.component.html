@@ -1,1 +1,139 @@
-<p>skills-list works!</p>
+<c-col xs="12">
+  <c-card class="mb-4">
+    <c-card-header>
+      <strong>Skills Management</strong>
+    </c-card-header>
+    <c-card-body style="position: relative;">
+      <p class="text-body-secondary small">
+        Manage and organize skills
+      </p>
+
+      <button cButton color="primary" style="position: absolute; top: 10px; right: 100px;" (click)="openCreateSkillModal()">
+        Add Skill
+      </button>
+
+      <c-input-group class="mb-3" style="max-width: 300px;">
+        <span cInputGroupText>
+          <svg cIcon name="cil-magnifying-glass"></svg>
+        </span>
+        <input cFormControl type="text" (input)="handleSearch($event)" placeholder="Search skills..." />
+      </c-input-group>
+
+      <table cTable>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Skill Name</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let skill of skills; let i = index">
+            <th scope="row">{{ i + 1 }}</th>
+            <td>
+              <ng-container *ngIf="editingSkill?._id !== skill._id; else editMode">
+                {{ skill.name }}
+              </ng-container>
+              <ng-template #editMode>
+                <input cFormControl [(ngModel)]="editingSkillName" class="form-control" />
+              </ng-template>
+            </td>
+            <td>{{ skill.createdAt | date }}</td>
+            <td>
+              <div class="d-md-flex mx-auto">
+                <div class="d-flex gap-2">
+                  <ng-container *ngIf="editingSkill?._id !== skill._id; else editButtons">
+                    <button cButton color="primary" (click)="startUpdate(skill)">Edit</button>
+                    <button cButton color="danger" (click)="removeSkill(skill._id)">Delete</button>
+                  </ng-container>
+                  <ng-template #editButtons>
+                    <button cButton color="success" (click)="confirmUpdate()">Save</button>
+                    <button cButton color="secondary" (click)="cancelUpdate()">Cancel</button>
+                  </ng-template>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="loading" class="text-center mt-3">
+        <c-spinner color="primary" label="Loading..."></c-spinner>
+      </div>
+
+      <div class="d-flex justify-content-center gap-2 mt-3">
+        <button cButton color="primary" [disabled]="currentPage === 1" (click)="prevPage()">
+          Previous
+        </button>
+        <span class="pt-2">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button cButton color="primary" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next
+        </button>
+      </div>
+
+      <!-- Create Skill Modal -->
+      <div *ngIf="isCreateWidgetVisible"
+           class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+           style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+        <div class="bg-light p-4 rounded shadow-lg" style="width: 400px; max-width: 90%;">
+          <h3>Add New Skill</h3>
+          <form (ngSubmit)="addSkill()">
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilPencil"></svg>
+              </span>
+              <input cFormControl [(ngModel)]="skillName" name="skillName" placeholder="Skill Name" required />
+            </c-input-group>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
+              <button cButton color="success" type="submit">Add</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </c-card-body>
+  </c-card>
+</c-col>
+
+<!-- <div>
+    <h2>Skills</h2>
+    <input type="text" [(ngModel)]="skillName" placeholder="New skill name" />
+    <button (click)="addSkill()">Add Skill</button>
+
+    <input
+      type="text"
+      [(ngModel)]="filterName"
+      placeholder="Filter by name"
+      (input)="loadSkills()"
+    />
+
+    <ul>
+      <li *ngFor="let skill of skills">
+        {{ skill.name }}
+        (ID: {{ skill._id }})
+        <button (click)="removeSkill(skill._id!)">Delete</button>
+        <button (click)="startUpdate(skill)">Edit</button>
+      </li>
+    </ul>
+    <div *ngIf="editingSkill">
+      <h3>Edit Skill: {{ editingSkill.name }}</h3>
+      <input
+        type="text"
+        [(ngModel)]="editingSkillName"
+        placeholder="New name for skill"
+      />
+      <button (click)="confirmUpdate()">Save Update</button>
+      <button (click)="cancelUpdate()">Cancel</button>
+    </div>
+
+    <div *ngIf="totalPages > 1">
+      Page {{ currentPage }} of {{ totalPages }}
+      <button (click)="prevPage()" [disabled]="currentPage <= 1">Prev</button>
+      <button (click)="nextPage()" [disabled]="currentPage >= totalPages">
+        Next
+      </button>
+    </div>
+  </div> -->

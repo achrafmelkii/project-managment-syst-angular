@@ -1,0 +1,298 @@
+<c-row class="justify-content-center">
+    <c-col xs="12" md="10" lg="8" xl="7">
+      <c-card class="mb-4">
+        <c-card-header>
+          <strong>User Profile</strong>
+          <!-- Buttons in View Mode Header -->
+          <div class="float-end" *ngIf="!isLoading && user && !isEditing">
+            <!-- Hidden file input, always present, triggered programmatically -->
+            
+            <button cButton color="primary" variant="outline" size="sm" (click)="toggleEdit()">
+              Modify Profile Details
+            </button>
+          </div>
+        </c-card-header>
+  
+        <c-card-body style="position: relative;">
+          <div *ngIf="isLoading || isImageLoading" class="text-center py-5">
+            <c-spinner color="primary" aria-hidden="true"></c-spinner>
+            <p class="mt-2">{{ isImageLoading ? 'Processing image...' : (isLoading ? 'Loading profile...' : 'Saving...') }}</p>
+          </div>
+  
+          <c-alert color="danger" *ngIf="errorMessage && !isLoading && !isImageLoading" class="mb-3">
+            {{ errorMessage }}
+          </c-alert>
+          <c-alert color="success" *ngIf="successMessage && !isLoading && !isImageLoading && !isEditing" class="mb-3">
+            {{ successMessage }}
+          </c-alert>
+  
+          <div *ngIf="!isLoading && !isImageLoading && user">
+            <!-- VIEW MODE -->
+            <div *ngIf="!isEditing">
+              <c-row class="mb-3">
+                <c-col md="4" class="text-center text-md-start mb-3 mb-md-0">
+                  <c-avatar
+                    [src]="imagePreview || user.image || 'https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png'"
+                    size="xl"
+                    shape="rounded-circle"
+                    class="profile-avatar-view"
+                  ></c-avatar>
+                </c-col>
+                <c-col md="8" class="d-flex flex-column justify-content-center">
+                  <h3>{{ userFullName }}</h3>
+                  <p class="text-medium-emphasis mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                  <p class="mb-0">
+                    <strong>Status:</strong>
+                    <span [ngClass]="{'text-success': user.isActive, 'text-danger': !user.isActive}" class="fw-bold">
+                      {{ user.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </p>
+                </c-col>
+              </c-row>
+  
+              <hr class="my-3" />
+  
+              <h5>Skills</h5>
+              <p *ngIf="skillsDisplay && skillsDisplay !== 'N/A'; else noSkillsView">
+                {{ skillsDisplay }}
+              </p>
+              <ng-template #noSkillsView>
+                <p class="text-medium-emphasis">No skills listed.</p>
+              </ng-template>
+            </div>
+  
+            <!-- EDIT MODE (for profile details) -->
+            <div *ngIf="isEditing">
+              <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                <c-row class="mb-4 align-items-center">
+                  <c-col md="4" class="text-center mb-3 mb-md-0">
+                    <c-avatar
+                      [src]="imagePreview || user.image|| 'https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png'"
+                      size="xl"
+                      shape="rounded-circle"
+                      class="profile-avatar-edit"
+                    ></c-avatar>
+                    <!-- Button to re-trigger file selection while in edit mode -->
+                    <input  
+                    type="file"
+                    id="imageUploadGlobal"
+                    (change)="onFileSelected($event)"
+                    accept="image/*"
+                    class="d-none"
+                    #fileInput
+                  />
+                  <button
+                    cButton
+                    color="info"
+                    variant="outline"
+                    size="sm"
+                    (click)="triggerFileInput()" 
+                    class="me-2"
+                    title="Select a new profile image. It will be uploaded when you save profile details."
+                  >
+                      Change Displayed Image1
+                    </button>
+                  </c-col>
+                  <c-col md="8">
+                    <div class="mb-3">
+                      <label cLabel for="firstName">First Name</label>
+                      <input cFormControl id="firstName" type="text" formControlName="firstName" placeholder="Enter first name" [ngClass]="{'is-invalid': isInvalid('firstName')}" />
+                      <c-form-feedback [valid]="false" *ngIf="isInvalid('firstName')">{{ getErrorMessage('firstName') }}</c-form-feedback>
+                    </div>
+                    <div class="mb-3">
+                      <label cLabel for="lastName">Last Name</label>
+                      <input cFormControl id="lastName" type="text" formControlName="lastName" placeholder="Enter last name" [ngClass]="{'is-invalid': isInvalid('lastName')}" />
+                      <c-form-feedback [valid]="false" *ngIf="isInvalid('lastName')">{{ getErrorMessage('lastName') }}</c-form-feedback>
+                    </div>
+                  </c-col>
+                </c-row>
+  
+                <div class="mb-3">
+                  <label cLabel for="email">Email</label>
+                  <c-input-group class="has-validation">
+                    <input cFormControl id="email" type="email" formControlName="email" placeholder="Enter email" [ngClass]="{'is-invalid': isInvalid('email')}" />
+                    <c-form-feedback [valid]="false" *ngIf="isInvalid('email')">{{ getErrorMessage('email') }}</c-form-feedback>
+                  </c-input-group>
+                </div>
+  
+                <!-- SKILLS MULTI-SELECT DROPDOWN -->
+                <div class="mb-3">
+                  <label cLabel for="skills">Skills (Select up to 5)</label>
+                  <select
+                    cFormControl
+                    id="skills"
+                    formControlName="skills"
+                    multiple
+                    size="5" 
+                    aria-describedby="skillsHelp"
+                    [ngClass]="{'is-invalid': isInvalid('skills')}"
+                  >
+                    <option *ngFor="let skill of availableSkills" [value]="skill.name">
+                      {{ skill.name }}
+                    </option>
+                  </select>
+                  <c-form-feedback [valid]="false" *ngIf="isInvalid('skills')">{{ getErrorMessage('skills') }}</c-form-feedback>
+                  <small id="skillsHelp" cFormText>
+                    Hold Ctrl (or Cmd on Mac) to select multiple skills. Max 5 allowed.
+                  </small>
+                </div>
+  
+            
+  
+                <hr class="my-4" />
+  
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button cButton color="secondary" type="button" (click)="toggleEdit()" [disabled]="isLoading || isImageLoading">
+                    Cancel
+                  </button>
+                  <button cButton color="primary" type="submit" [disabled]="profileForm.invalid || isLoading || isImageLoading">
+                    <c-spinner size="sm" *ngIf="isLoading || isImageLoading" aria-hidden="true"></c-spinner>
+                    {{ (isLoading || isImageLoading) ? ' Saving...' : 'Save Changes' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+  
+          <div *ngIf="!isLoading && !isImageLoading && !user && !errorMessage" class="text-center py-5">
+            <p class="text-medium-emphasis">No user data to display or user not found.</p>
+          </div>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+
+<!-- <c-row class="justify-content-center">
+    <c-col xs="12" md="10" lg="8" xl="7">
+      <c-card class="mb-4">
+        <c-card-header>
+          <strong>User Profile</strong>
+          <div class="float-end" *ngIf="!isLoading && user && !isEditing">
+            <button cButton color="primary" variant="outline" size="sm" (click)="toggleEdit()">
+              Edit Profile
+            </button>
+          </div>
+        </c-card-header>
+        <c-card-body style="position: relative;">
+
+          <div *ngIf="isLoading" class="text-center py-5">
+            <c-spinner color="primary" aria-hidden="true"></c-spinner>
+            <p class="mt-2">Loading profile...</p>
+          </div>
+  
+          <c-alert color="danger" *ngIf="errorMessage && !isLoading" class="mb-3">
+            {{ errorMessage }}
+          </c-alert>
+          <c-alert color="success" *ngIf="successMessage && !isLoading && !isEditing" class="mb-3">
+            {{ successMessage }}
+          </c-alert>
+  
+          <div *ngIf="!isLoading && user">
+            VIEW MODE
+            <div *ngIf="!isEditing">
+              <c-row class="mb-3">
+                <c-col md="4" class="text-center text-md-start mb-3 mb-md-0">
+                  <c-avatar
+                    [src]="imagePreview || user.image || 'https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png'"
+                    size="xl"
+                    shape="rounded-circle"
+                    class="profile-avatar-view"
+                  ></c-avatar>
+                </c-col>
+                <c-col md="8" class="d-flex flex-column justify-content-center">
+                  <h3>{{ userFullName }}</h3>
+                  <p class="text-medium-emphasis mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                  <p class="mb-0">
+                    <strong>Status:</strong>
+                    <span [ngClass]="{'text-success': user.isActive, 'text-danger': !user.isActive}" class="fw-bold">
+                      {{ user.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </p>
+                </c-col>
+              </c-row>
+  
+              <hr class="my-3" />
+  
+              <h5>Skills</h5>
+              <p *ngIf="skillsDisplay && skillsDisplay !== 'N/A'; else noSkillsView">
+                {{ skillsDisplay }}
+              </p>
+              <ng-template #noSkillsView>
+                <p class="text-medium-emphasis">No skills listed.</p>
+              </ng-template>
+            </div>
+  
+            EDIT MODE
+            <div *ngIf="isEditing">
+              <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                <c-row class="mb-4 align-items-center">
+                  <c-col md="4" class="text-center mb-3 mb-md-0">
+                     <c-avatar
+                      [src]="imagePreview || (user ? user.image : 'https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png')"
+                      size="xl"
+                      shape="rounded-circle"
+                      class="profile-avatar-edit"
+                    ></c-avatar>
+                    <input type="file" id="imageUpload" (change)="onFileSelected($event)" accept="image/*" class="d-none" #fileInput />
+                    <button cButton color="secondary" variant="outline" size="sm" class="mt-2" (click)="fileInput.click()">
+                      Change Image
+                    </button>
+                  </c-col>
+                  <c-col md="8">
+                    <div class="mb-3">
+                      <label cLabel for="firstName">First Name</label>
+                      <input cFormControl id="firstName" type="text" formControlName="firstName" placeholder="Enter first name" [ngClass]="{'is-invalid': isInvalid('firstName')}" />
+                      <c-form-feedback [valid]="false" *ngIf="isInvalid('firstName')">{{ getErrorMessage('firstName') }}</c-form-feedback>
+                    </div>
+                    <div class="mb-3">
+                      <label cLabel for="lastName">Last Name</label>
+                      <input cFormControl id="lastName" type="text" formControlName="lastName" placeholder="Enter last name" [ngClass]="{'is-invalid': isInvalid('lastName')}" />
+                      <c-form-feedback [valid]="false" *ngIf="isInvalid('lastName')">{{ getErrorMessage('lastName') }}</c-form-feedback>
+                    </div>
+                  </c-col>
+                </c-row>
+  
+                <div class="mb-3">
+                  <label cLabel for="email">Email</label>
+                  <c-input-group class="has-validation">
+                     If you have IconModule setup
+                    <input cFormControl id="email" type="email" formControlName="email" placeholder="Enter email" [ngClass]="{'is-invalid': isInvalid('email')}" />
+                    <c-form-feedback [valid]="false" *ngIf="isInvalid('email')">{{ getErrorMessage('email') }}</c-form-feedback>
+                  </c-input-group>
+                </div>
+  
+                <div class="mb-3">
+                  <label cLabel for="skills">Skills (comma-separated)</label>
+                  <textarea cFormControl id="skills" formControlName="skills" rows="3" placeholder="e.g., Angular, TypeScript, Node.js"></textarea>
+                  <small class="text-medium-emphasis">Enter skills separated by commas.</small>
+                </div>
+  
+                <c-form-check class="mb-3">
+                  <input cFormCheckInput id="isActive" type="checkbox" formControlName="isActive" />
+                  <label cFormCheckLabel for="isActive">User is Active</label>
+                </c-form-check>
+  
+                <hr class="my-4" />
+  
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button cButton color="secondary" type="button" (click)="toggleEdit()" [disabled]="isLoading">
+                    Cancel
+                  </button>
+                  <button cButton color="primary" type="submit" [disabled]="profileForm.invalid || isLoading">
+                    <c-spinner size="sm" *ngIf="isLoading" aria-hidden="true"></c-spinner>
+                    {{ isLoading ? ' Saving...' : 'Save Changes' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+  
+          <div *ngIf="!isLoading && !user && !errorMessage" class="text-center py-5">
+            <p class="text-medium-emphasis">No user data to display or user not found.</p>
+          </div>
+  
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row> -->

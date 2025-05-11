@@ -23,18 +23,23 @@ import {
   ButtonModule,
 } from '@coreui/angular';
 interface Project {
-  // Define an interface for your project data
   _id: string;
   name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  assignments: string[];
+  requiredSkills: string[];
+  tasks: string[];
+  users: string[];
   manager: {
+    _id: string;
     firstName: string;
     lastName: string;
     image: string;
   };
-  startDate: string;
-  endDate: string;
   createdAt: string;
-  // Add other properties as needed
 }
 @Component({
   selector: 'app-manager-project-list',

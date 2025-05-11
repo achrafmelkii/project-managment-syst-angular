@@ -97,6 +97,11 @@ export class LoginComponent {
         const decoded: any = jwtDecode(token);
         const role = decoded?.user?.role || 'EMPLOYEE';
         this.authService.setUserRole(role);
+
+        const userId = decoded?.user?._id;
+        this.authService.setUserID(userId); // Fixed method name
+        console.log('userId :', userId);
+
         console.log('role :', role);
         this.router.navigate([`/${role}/dashboard`]);
         this.loading = false;

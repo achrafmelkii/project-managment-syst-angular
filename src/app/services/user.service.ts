@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Skill } from './skills.service';
 
 export interface User {
   _id: string;
@@ -12,7 +13,7 @@ export interface User {
   image: 'https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png';
   assignments: [];
   isActive: true;
-  skills: [];
+  skills: Skill[];
   availability: [];
 }
 
@@ -83,7 +84,13 @@ export class UserService {
   }
 
   getUserById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/users/${id}`);
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get(`${this.apiUrl}/users/${id}`, {
+      // params,
+      headers,
+    });
   }
 
   deleteUser(id: string): Observable<any> {
@@ -101,7 +108,13 @@ export class UserService {
   }
 
   updateProfile(user: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/users/profile/${user._id}`, user);
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.put(`${this.apiUrl}/users/profile/${user._id}`, user, {
+      // params,
+      headers,
+    });
   }
 
   updateUser(id: string, data: any): Observable<any> {
@@ -118,9 +131,15 @@ export class UserService {
   }
 
   updateUserImage(user: { _id: string; image: File }): Observable<any> {
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
     const formData = new FormData();
     formData.append('image', user.image);
 
-    return this.http.put(`${this.apiUrl}/uploads/image/${user._id}`, formData);
+    return this.http.put(`${this.apiUrl}/uploads/image/${user._id}`, formData, {
+      // params,
+      headers,
+    });
   }
 }

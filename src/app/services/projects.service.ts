@@ -6,37 +6,52 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ProjectsService {
-  private apiUrl = 'http://localhost:5000/api'; //  Base URL for your projects API
+  private apiUrl = 'http://localhost:5000/api/projects';
 
   constructor(private http: HttpClient) {}
 
-  getProjectsList(filter: { name?: string; page?: number }): Observable<any> {
+  // Helper method to set Authorization headers
+  private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token') || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
 
+  // Get List of Projects with Optional Filtering
+  getProjectsList(filter: { name?: string; page?: number }): Observable<any> {
+    const headers = this.getAuthHeaders();
     let params = new HttpParams();
+
     if (filter.name) {
       params = params.set('name', filter.name);
     }
     if (filter.page) {
       params = params.set('page', filter.page.toString());
     }
-    return this.http.get(`${this.apiUrl}/projects`, { params, headers });
+
+    return this.http.get(`${this.apiUrl}`, { params, headers });
   }
-  //added
+
+  // Get Project by ID
   getProjectById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+    const headers = this.getAuthHeaders();
+    return this.http.get(`${this.apiUrl}/${id}`, { headers });
   }
 
+  // Create a New Project
   createProject(project: any): Observable<any> {
-    return this.http.post(this.apiUrl, project);
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}`, project, { headers });
   }
 
+  // Update an Existing Project
   updateProject(id: string, project: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, project);
+    const headers = this.getAuthHeaders();
+    return this.http.put(`${this.apiUrl}/${id}`, project, { headers });
   }
 
+  // Delete a Project
   deleteProject(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    const headers = this.getAuthHeaders();
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers });
   }
 }
