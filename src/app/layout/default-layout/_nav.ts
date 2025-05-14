@@ -14,7 +14,7 @@ const employeeNav: INavData[] = [
   },
   {
     name: 'Projects',
-    url: '/manager/projects',
+    url: '/employee/projects',
     iconComponent: { name: 'cil-File' },
   },
 

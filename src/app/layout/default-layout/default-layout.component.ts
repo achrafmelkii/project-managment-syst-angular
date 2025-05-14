@@ -58,12 +58,12 @@ export class DefaultLayoutComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    const userRole = this.authService.getUserRole();
+    const userRole = this.authService.getUserRole() as UserRole;
     console.log('Nav items before:', this.navItems);
     console.log('User role:', userRole);
     console.log('Available nav items:', navItems);
 
-    this.navItems = navItems[userRole] || [];
+    this.navItems = navItems[userRole as UserRole] || [];
 
     console.log('Nav items after:', this.navItems);
   }

@@ -67,57 +67,158 @@
           </button>
         </div>
       </div>
+   
       <div *ngIf="isCreateWidgetVisible"
-      class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-      style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
-   <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
-     <h3>Create New Project</h3>
-     <form [formGroup]="createProjectForm">
-       <c-input-group class="mb-3">
-         <span cInputGroupText>
-           <svg cIcon name="cilFolder"></svg>
-         </span>
-         <input cFormControl formControlName="name" placeholder="Project Name" required />
-       </c-input-group>
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 90%;">
+    <h3>Create New Project</h3>
+    <form [formGroup]="createProjectForm">
+      <!-- Name row -->
+      <c-row class="mb-3">
+        <c-col>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilFolder"></svg></span>
+            <input cFormControl formControlName="name" placeholder="Project Name" required>
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Dates row -->
+      <c-row class="mb-3">
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl formControlName="startDate" type="date">
+          </c-input-group>
+        </c-col>
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl formControlName="endDate" type="date">
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Status and Skills row -->
+      <c-row class="mb-3">
+        <c-col md="4">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilList"></svg></span>
+            <select cFormControl formControlName="status" class="form-select">
+              <option value="Ouvert">Ouvert</option>
+              <option value="Fermé">Fermé</option>
+            </select>
+          </c-input-group>
+        </c-col>
+        <c-col md="8">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilTags"></svg></span>
+            <input cFormControl formControlName="requiredSkills" 
+                   placeholder="Required Skills (comma-separated)">
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Description row -->
+      <c-row class="mb-3">
+        <c-col>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilDescription"></svg></span>
+            <textarea cFormControl formControlName="description" 
+                      placeholder="Description" rows="3"></textarea>
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
+        <button cButton color="success" type="button" 
+                [disabled]="!createProjectForm.valid"
+                (click)="createProject()">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
  
-       <c-input-group class="mb-3">
-         <span cInputGroupText>
-           <svg cIcon name="cilCalendar"></svg>
-         </span>
-         <input cFormControl formControlName="startDate" type="date" placeholder="Start Date" />
-       </c-input-group>
- 
-       <c-input-group class="mb-3">
-         <span cInputGroupText>
-           <svg cIcon name="cilCalendar"></svg>
-         </span>
-         <input cFormControl formControlName="endDate" type="date" placeholder="End Date" />
-       </c-input-group>
- 
-       <c-input-group class="mb-3">
-         <span cInputGroupText>
-           <svg cIcon name="cilList"></svg>
-         </span>
-         <select cFormControl formControlName="status" class="form-select">
-           <option value="Ouvert">Ouvert</option>
-           <option value="Fermé">Fermé</option>
-         </select>
-       </c-input-group>
- 
-       <c-input-group class="mb-3">
-         <span cInputGroupText>
-           <svg cIcon name="cilDescription"></svg>
-         </span>
-         <textarea cFormControl formControlName="description" placeholder="Description" rows="3"></textarea>
-       </c-input-group>
- 
-       <div class="d-flex justify-content-end gap-2">
-         <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
-         <button cButton color="success" type="button" (click)="createProject()">Create</button>
-       </div>
-     </form>
-   </div>
- </div>
+<div *ngIf="isEditWidgetVisible && selectedProject"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 90%;">
+    <h3>Edit Project</h3>
+    <form #editForm="ngForm">
+      <!-- Name and Manager row -->
+      <c-row class="mb-3">
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilFolder"></svg></span>
+            <input cFormControl [(ngModel)]="selectedProject.name" name="name" placeholder="Project Name" required />
+          </c-input-group>
+        </c-col>
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilUser"></svg></span>
+            <input cFormControl [value]="selectedProject.manager.firstName + ' ' + selectedProject.manager.lastName" 
+                   disabled placeholder="Manager Name" />
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Dates row -->
+      <c-row class="mb-3">
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl [(ngModel)]="selectedProject.startDate" name="startDate" type="date" />
+          </c-input-group>
+        </c-col>
+        <c-col md="6">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl [(ngModel)]="selectedProject.endDate" name="endDate" type="date" />
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Status and Skills row -->
+      <c-row class="mb-3">
+        <c-col md="4">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilList"></svg></span>
+            <select cFormControl [(ngModel)]="selectedProject.status" name="status" class="form-select">
+              <option value="Ouvert">Ouvert</option>
+              <option value="Fermé">Fermé</option>
+            </select>
+          </c-input-group>
+        </c-col>
+        <c-col md="8">
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilTags"></svg></span>
+            <input cFormControl [(ngModel)]="selectedProject.requiredSkills" name="requiredSkills" 
+                   placeholder="Required Skills (comma-separated)" />
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Description row -->
+      <c-row class="mb-3">
+        <c-col>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilDescription"></svg></span>
+            <textarea cFormControl [(ngModel)]="selectedProject.description" name="description" 
+                      placeholder="Description" rows="3"></textarea>
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <!-- Buttons -->
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
+        <button cButton color="primary" type="button" (click)="onSaveChanges()">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
  
     </c-card-body>
   </c-card>

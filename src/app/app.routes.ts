@@ -3,6 +3,7 @@ import { DefaultLayoutComponent } from './layout';
 import { LoginComponent } from './views/pages/login/login.component';
 import { UsersListComponent } from './views/users-list/users-list.component';
 import { AuthGuard } from './services/auth.service';
+import { RoleGuard } from './services/roleguard.service';
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 
@@ -13,8 +14,8 @@ export const routes: Routes = [
     children: [
       {
         path: 'manager',
-        // canActivate: [RoleGuard],
-        data: { role: 'MANAGER' },
+        canActivate: [RoleGuard],
+        data: { role: 'manager' },
         children: [
           {
             path: 'dashboard',
@@ -25,9 +26,7 @@ export const routes: Routes = [
           {
             path: 'projects',
             loadChildren: () =>
-              import('./views/manager-project-list/routes').then(
-                (m) => m.routes
-              ),
+              import('./views/project-list/routes').then((m) => m.routes),
           },
           {
             path: 'profile',
@@ -49,8 +48,8 @@ export const routes: Routes = [
       },
       {
         path: 'responsible',
-        // canActivate: [RoleGuard],
-        data: { role: 'RESPONSIBLE' },
+        canActivate: [RoleGuard],
+        data: { role: 'responsible' },
         children: [
           {
             path: 'dashboard',
@@ -94,8 +93,8 @@ export const routes: Routes = [
       },
       {
         path: 'employee',
-        // canActivate: [RoleGuard],
-        data: { role: 'EMPLOYEE' },
+        canActivate: [RoleGuard],
+        data: { role: 'employee' },
         children: [
           {
             path: 'dashboard',
@@ -106,7 +105,9 @@ export const routes: Routes = [
           {
             path: 'projects',
             loadChildren: () =>
-              import('./views/project-list/routes').then((m) => m.routes),
+              import('./views/consultant-project-list/routes').then(
+                (m) => m.routes
+              ),
           },
 
           {

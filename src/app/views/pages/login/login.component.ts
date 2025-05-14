@@ -95,8 +95,8 @@ export class LoginComponent {
         );
 
         const decoded: any = jwtDecode(token);
-        const role = decoded?.user?.role || 'EMPLOYEE';
-        this.authService.setUserRole(role);
+        const role = decoded?.user?.role || 'employee'; // Default to 'employee' if role is not found
+        this.authService.setUserRole(role.toLowerCase());
 
         const userId = decoded?.user?._id;
         this.authService.setUserID(userId); // Fixed method name

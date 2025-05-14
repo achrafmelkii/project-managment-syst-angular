@@ -21,9 +21,8 @@ import {
   ButtonDirective,
   TableDirective,
   ButtonModule,
-  GridModule,
 } from '@coreui/angular';
-import { SkillsService } from 'src/app/services/skills.service';
+import { Skill } from 'src/app/services/skills.service';
 interface Project {
   _id: string;
   name: string;
@@ -32,7 +31,7 @@ interface Project {
   endDate: string;
   status: string;
   assignments: string[];
-  requiredSkills: string[];
+  requiredSkills: Skill[];
   tasks: string[];
   users: string[];
   manager: {
@@ -44,9 +43,8 @@ interface Project {
   createdAt: string;
 }
 @Component({
-  selector: 'app-manager-project-list',
+  selector: 'app-consultant-project-list',
   imports: [
-    GridModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -61,16 +59,15 @@ interface Project {
     TableDirective,
     ButtonModule,
   ],
-  templateUrl: './manager-project-list.component.html',
-  styleUrl: './manager-project-list.component.scss',
+  templateUrl: './consultant-project-list.component.html',
+  styleUrl: './consultant-project-list.component.scss',
 })
-export class ManagerProjectListComponent implements OnInit, OnDestroy {
+export class ConsultantProjectListComponent implements OnInit, OnDestroy {
   projects: Project[] = [];
   selectedProject: Project | null = null;
   isEditWidgetVisible = false;
   isCreateWidgetVisible = false;
   createProjectForm: FormGroup;
-  availableSkills: Skill[] = [];
 
   search: string = '';
   currentPage: number = 1;
@@ -81,50 +78,18 @@ export class ManagerProjectListComponent implements OnInit, OnDestroy {
 
   constructor(
     private projectService: ProjectsService,
-    private skillsService: SkillsService,
     private fb: FormBuilder
   ) {
     this.createProjectForm = this.fb.group({
       name: ['', Validators.required],
-      description: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+      description: [''],
+      startDate: [''],
+      endDate: [''],
       status: ['Ouvert', Validators.required],
-      requiredSkills: [[], Validators.required], // Changed to array default
     });
   }
-
   ngOnInit(): void {
     this.fetchProjects();
-    this.fetchSkills();
-  }
-
-  loadAvailableSkills(): void {
-    this.skillsService.getAllSkills({ page: 1, pageSize: 1000 }).subscribe({
-      // Fetch a large number
-      next: (response) => {
-        this.availableSkills = response.skills || [];
-      },
-      error: (err) => {
-        console.error('Failed to load available skills:', err);
-        this.errorMessage =
-          'Could not load available skills. Please try again.'; // User-friendly error
-      },
-    });
-  }
-
-  // Add this method to handle multiple skill selection
-  onSkillSelect(event: any, form: string): void {
-    const selectedOptions = event.target.selectedOptions;
-    const selectedSkills = Array.from(selectedOptions).map(
-      (option: any) => option.value
-    );
-
-    if (form === 'create') {
-      this.createProjectForm.patchValue({ requiredSkills: selectedSkills });
-    } else if (form === 'edit' && this.selectedProject) {
-      this.selectedProject.requiredSkills = selectedSkills;
-    }
   }
 
   fetchProjects(): void {
@@ -168,37 +133,21 @@ export class ManagerProjectListComponent implements OnInit, OnDestroy {
 
   createProject(): void {
     if (this.createProjectForm.valid) {
-      const formValue = this.createProjectForm.value;
-
-      // Convert comma-separated skills to array
-      const requiredSkills = formValue.requiredSkills
-        .split(',')
-        .map((skill: string) => skill.trim())
-        .filter((skill: string) => skill.length > 0);
-
-      const projectData = {
-        ...formValue,
-        requiredSkills,
-      };
-
-      this.projectService.createProject(projectData).subscribe({
-        next: (response) => {
-          console.log('Project created:', response);
-          this.isCreateWidgetVisible = false;
-          this.createProjectForm.reset();
-          this.fetchProjects();
-        },
-        error: (error) => {
-          console.error('Failed to create project:', error);
-        },
-      });
+      this.projectService
+        .createProject(this.createProjectForm.value)
+        .subscribe({
+          next: (response) => {
+            console.log('Project created:', response);
+            this.isCreateWidgetVisible = false;
+            this.createProjectForm.reset();
+            this.fetchProjects();
+          },
+          error: (error) => {
+            console.error('Failed to create project:', error);
+          },
+        });
     } else {
-      Object.keys(this.createProjectForm.controls).forEach((key) => {
-        const control = this.createProjectForm.get(key);
-        if (control?.invalid) {
-          control.markAsTouched();
-        }
-      });
+      console.warn('Form is invalid:', this.createProjectForm.errors);
     }
   }
 

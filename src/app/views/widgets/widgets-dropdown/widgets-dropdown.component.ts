@@ -28,6 +28,7 @@ import {
 } from '@coreui/angular';
 import { AuthService } from '../../../services/auth.service';
 import { routes } from '../routes';
+import { CommonModule } from '@angular/common'; // Add this import
 
 @Component({
   selector: 'app-widgets-dropdown',
@@ -35,6 +36,7 @@ import { routes } from '../routes';
   styleUrls: ['./widgets-dropdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.Default,
   imports: [
+    CommonModule,
     RowComponent,
     ColComponent,
     WidgetStatAComponent,
@@ -107,10 +109,9 @@ export class WidgetsDropdownComponent implements OnInit {
   }
 
   loadUserRole() {
-    this.userRole = this.authService.getUserRole(); // Assume you have this method in AuthService
-    console.log('User role:', this.userRole);
-
+    this.userRole = this.authService.getUserRole();
     this.isEmployee = this.userRole === 'employee';
+    console.log('Is Employee:', this.isEmployee, 'Role:', this.userRole);
   }
 
   fetchProjectsCount() {

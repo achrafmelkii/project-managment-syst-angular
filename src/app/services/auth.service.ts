@@ -38,11 +38,17 @@ export class AuthService {
     );
   }
 
-  getUserRole(): UserRole {
-    // Add console.log to debug
-    const role = localStorage.getItem('userRole') as UserRole;
-    console.log('Current user role:', role);
-    return role || 'EMPLOYEE'; // Default to EMPLOYEE if no role found
+  // old
+  // getUserRole(): UserRole {
+  //   // Add console.log to debug
+  //   const role = localStorage.getItem('userRole') as UserRole;
+  //   console.log('Current user role:', role);
+  //   return role || 'EMPLOYEE'; // Default to EMPLOYEE if no role found
+  // }
+  getUserRole(): string {
+    const role = localStorage.getItem('userRole');
+    console.log('Getting user role:', role); // Debug log
+    return role?.toLowerCase() || ''; // Convert to lowercase to match route data
   }
 
   // Make sure to set the role when user logs in
