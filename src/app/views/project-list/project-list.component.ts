@@ -22,7 +22,7 @@ import {
   TableDirective,
   ButtonModule,
 } from '@coreui/angular';
-import { Skill } from '../../services/skills.service';
+import { Skill, SkillsService } from '../../services/skills.service';
 interface Project {
   _id: string;
   name: string;
@@ -67,6 +67,8 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   selectedProject: Project | null = null;
   isEditWidgetVisible = false;
 
+  availableSkills: Skill[] = [];
+
   search: string = '';
   currentPage: number = 1;
   pages: number = 0;
@@ -76,6 +78,8 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
   constructor(
     private projectService: ProjectsService,
+    private skillsService: SkillsService, // Inject SkillsService
+
     private fb: FormBuilder
   ) {}
   ngOnInit(): void {
@@ -97,6 +101,18 @@ export class ProjectListComponent implements OnInit, OnDestroy {
           this.loading = false;
         }
       );
+  }
+
+  loadAvailableSkills(): void {
+    this.skillsService.getAllSkills({ page: 1, pageSize: 1000 }).subscribe({
+      // Fetch a large number
+      next: (response) => {
+        this.availableSkills = response.skills || [];
+      },
+      error: (err) => {
+        console.error('Failed to load available skills:', err);
+      },
+    });
   }
 
   onViewProject(project: any) {

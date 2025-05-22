@@ -83,8 +83,34 @@ export class AuthService {
     this.authStatus.next(false); // Notify other parts of the app
   }
 
+  private isTokenExpired(token: string): boolean {
+    try {
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) return true;
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const expirationTime = payload.exp * 1000; // Convert to milliseconds
+      const currentTime = Date.now();
+
+      return currentTime >= expirationTime;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true;
+    }
+  }
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    console.log('Checking if user is logged in:', token);
+
+    if (!token) return false;
+
+    if (this.isTokenExpired(token)) {
+      console.log('Token is expired, logging out');
+      this.logout();
+      return false;
+    }
+
+    return true;
   }
 }
 

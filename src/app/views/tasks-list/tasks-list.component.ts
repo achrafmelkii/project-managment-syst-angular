@@ -24,8 +24,11 @@ import {
 } from '@coreui/angular';
 import { Task, TasksService } from '../../services/tasks.service';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { User, UserService } from '../../services/user.service';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-tasks-list',
   imports: [
@@ -72,9 +75,15 @@ export class TasksListComponent implements OnInit {
   isModalOpen = false;
   currentStatus: string = '';
 
+  userRole: string | null = null; // Store the user role
+
   readonly headData = ['Titre', 'Project', 'Status', 'Créé à', 'Actions'];
 
-  constructor(private taskService: TasksService) {
+  constructor(
+    private taskService: TasksService,
+    private authService: AuthService
+  ) {
+    this.loadUserRole();
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
@@ -92,23 +101,51 @@ export class TasksListComponent implements OnInit {
     this.searchSubject.next(value);
   }
 
-  loadTasks(): void {
-    this.isLoading = true;
-    this.taskService
-      .getAssignedTasks(this.page, 10, this.searchTerm)
-      .subscribe({
-        next: (response) => {
-          this.tasks = response.tasks;
-          this.totalPages = response.pages;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading tasks:', error);
-          this.isLoading = false;
-        },
-      });
+  loadUserRole() {
+    this.userRole = this.authService.getUserRole(); // Assume you have this method in AuthService
+    console.log('User role:', this.userRole);
   }
 
+  loadTasks(): void {
+    this.isLoading = true;
+    switch (this.userRole) {
+      case 'employee': {
+        this.taskService
+          .getAssignedTasks(this.page, 10, this.searchTerm)
+          .subscribe({
+            next: (response) => {
+              this.tasks = response.tasks;
+              this.totalPages = response.pages;
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('Error loading tasks:', error);
+              this.isLoading = false;
+            },
+          });
+        break;
+      }
+
+      case 'manager': {
+        this.taskService.getMyTasks(this.page, 10, this.searchTerm).subscribe({
+          next: (response) => {
+            this.tasks = response.tasks;
+            this.totalPages = response.pages;
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error loading tasks:', error);
+            this.isLoading = false;
+          },
+        });
+        break;
+      }
+      default: {
+        console.log('Invalid user role:', this.userRole);
+        this.isLoading = false;
+      }
+    }
+  }
   onPageChange(newPage: number): void {
     this.page = newPage;
     this.loadTasks();

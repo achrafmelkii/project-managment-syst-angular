@@ -134,19 +134,16 @@ export class UserProfileComponent implements OnInit {
     let currentSkillNames: string[] = [];
     if (userData && userData.skills && Array.isArray(userData.skills)) {
       currentSkillNames = userData.skills
-        .filter(
-          (skill: any): skill is Skill =>
-            skill && typeof skill.name === 'string'
-        )
+        .filter((skill: any): skill is Skill => skill && typeof skill.name === 'string')
         .map((skill: Skill) => skill.name);
     }
 
     this.profileForm = this.fb.group({
-      firstName: [userData?.firstName || '', Validators.required],
-      lastName: [userData?.lastName || '', Validators.required],
-      email: [userData?.email || '', [Validators.required, Validators.email]],
+      firstName: [{ value: userData?.firstName || '', disabled: true }],
+      lastName: [{ value: userData?.lastName || '', disabled: true }],
+      email: [{ value: userData?.email || '', disabled: true }],
       isActive: [userData ? userData.isActive : true],
-      skills: [currentSkillNames, this.maxSkillsValidator(5)], // Use array for multi-select, add validator
+      skills: [currentSkillNames, this.maxSkillsValidator(5)]
     });
   }
 

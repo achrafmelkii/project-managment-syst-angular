@@ -15,6 +15,10 @@ import { DropdownModule, SidebarModule } from '@coreui/angular';
 import { IconSetService } from '@coreui/icons-angular';
 import { routes } from './app.routes';
 
+import localeFr from '@angular/common/locales/fr'; // Import French locale data
+import { registerLocaleData } from '@angular/common';
+registerLocaleData(localeFr, 'fr-FR'); // Register French locale data
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(

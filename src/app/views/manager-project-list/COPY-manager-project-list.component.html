@@ -1,10 +1,9 @@
 <c-col xs="12">
   <c-card class="mb-4">
     <c-card-header>
-      <strong>Projects Table (manager proj list)</strong>
+      <strong>Projects Table(manager proj list)</strong>
     </c-card-header>
     <c-card-body style="position: relative;">
-      <!-- ... (search and add project button) ... -->
       <p class="text-body-secondary small">
         Displaying project information dynamically
       </p>
@@ -15,12 +14,12 @@
 
       <c-input-group class="mb-3" style="max-width: 300px;">
         <span cInputGroupText>
-          <svg cIcon name="cilSearch"></svg>
+          <svg cIcon name="cilSearch"></svg> <!-- Make sure cilSearch icon is available -->
         </span>
         <input cFormControl type="text" (input)="handleSearch($event)" placeholder="Search projects..." />
       </c-input-group>
 
-      <table cTable responsive="sm" hover striped class="mb-0">
+      <table cTable responsive="sm" hover striped class="mb-0"> <!-- Added some cTable props for better styling -->
         <thead>
           <tr>
             <th>#</th>
@@ -34,17 +33,14 @@
         </thead>
         <tbody>
           <tr *ngFor="let project of projects; let i = index">
-            <td>{{ (currentPage - 1) * 10 + i + 1 }}</td>
+            <td>{{ (currentPage - 1) * 10 + i + 1 }}</td> <!-- Assuming 10 items per page for numbering -->
             <td>{{ project.name }}</td>
-            <td>
-              <!-- Use the new getManagerName utility -->
-              {{ getManagerName(project.manager) }}
-            </td>
+            <td>{{ project.manager.firstName }} {{ project.manager.lastName }}</td>
             <td>{{ project.startDate | date:'shortDate' }}</td>
             <td>{{ project.endDate | date:'shortDate' }}</td>
             <td>{{ project.createdAt | date:'shortDate' }}</td>
             <td>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2"> <!-- Simplified button layout -->
                 <button cButton color="primary" variant="outline" size="sm" (click)="onViewProject(project)">View</button>
                 <button cButton color="danger" variant="outline" size="sm" (click)="deleteProject(project)">Delete</button>
               </div>
@@ -56,13 +52,12 @@
         </tbody>
       </table>
 
-      <!-- ... (loading spinner and pagination) ... -->
-      <div *ngIf="loading || loadingManagers" class="text-center mt-3 py-5">
+      <div *ngIf="loading" class="text-center mt-3 py-5"> <!-- Increased padding for loader -->
         <c-spinner color="primary"></c-spinner>
-        <p class="mt-2">{{ loadingManagers ? 'Loading managers...' : (loading ? 'Loading projects...' : 'Loading...') }}</p>
+        <p class="mt-2">Loading projects...</p>
       </div>
 
-      <div *ngIf="!loading && pages > 1" class="d-flex justify-content-center mt-4">
+      <div *ngIf="!loading && pages > 1" class="d-flex justify-content-center mt-4"> <!-- Pagination -->
         <nav aria-label="Project pagination">
           <ul class="pagination">
             <li class="page-item" [class.disabled]="currentPage === 1">
@@ -77,7 +72,7 @@
           </ul>
         </nav>
       </div>
-
+   
       <!-- CREATE PROJECT MODAL / WIDGET -->
       <div *ngIf="isCreateWidgetVisible"
            class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -85,9 +80,9 @@
         <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 90%; max-height: 90vh; overflow-y: auto;">
           <h3>Create New Project</h3>
           <form [formGroup]="createProjectForm" (ngSubmit)="createProject()">
-            <!-- Name and Manager Row -->
+            <!-- Name row -->
             <c-row class="mb-3">
-              <c-col md="6">
+              <c-col>
                 <label cLabel for="createProjectName">Project Name</label>
                 <c-input-group class="has-validation">
                   <span cInputGroupText><svg cIcon name="cilFolder"></svg></span>
@@ -96,23 +91,9 @@
                   <c-form-feedback [valid]="false" *ngIf="isInvalid('name')">{{ getErrorMessage('name') }}</c-form-feedback>
                 </c-input-group>
               </c-col>
-              <c-col md="6">
-                <label cLabel for="createManager">Manager</label>
-                <c-input-group class="has-validation">
-                  <span cInputGroupText><svg cIcon name="cilUser"></svg></span>
-                  <select cFormControl id="createManager" formControlName="manager" class="form-select"
-                          [ngClass]="{'is-invalid': isInvalid('manager')}">
-                    <option value="" disabled>Select a Manager</option>
-                    <option *ngFor="let mgr of availableManagers" [value]="mgr._id">
-                      {{ mgr.firstName }} {{ mgr.lastName }}
-                    </option>
-                  </select>
-                  <c-form-feedback [valid]="false" *ngIf="isInvalid('manager')">{{ getErrorMessage('manager') }}</c-form-feedback>
-                </c-input-group>
-              </c-col>
             </c-row>
 
-            <!-- Dates row (Unchanged) -->
+            <!-- Dates row -->
             <c-row class="mb-3">
               <c-col md="6">
                 <label cLabel for="createStartDate">Start Date</label>
@@ -134,7 +115,7 @@
               </c-col>
             </c-row>
 
-            <!-- Status and Skills row (Unchanged, ensure status options align with schema) -->
+            <!-- Status and Skills row -->
             <c-row class="mb-3">
               <c-col md="4">
                 <label cLabel for="createStatus">Status</label>
@@ -143,25 +124,26 @@
                   <select cFormControl id="createStatus" formControlName="status" class="form-select"
                           [ngClass]="{'is-invalid': isInvalid('status')}">
                     <option value="Ouvert">Ouvert</option>
-                    <option value="En cours">En cours</option>
-                    <option value="Complété">Complété</option> <!-- Aligned with schema -->
+                    <option value="En cours">En cours</option> <!-- Added another status -->
+                    <option value="En attente">En attente</option>
                   </select>
                    <c-form-feedback [valid]="false" *ngIf="isInvalid('status')">{{ getErrorMessage('status') }}</c-form-feedback>
                 </c-input-group>
               </c-col>
               <c-col md="8">
-                <div class="mb-0">
+                <div class="mb-0"> <!-- Reduced margin bottom -->
                   <label cLabel for="createRequiredSkills">Required Skills (Select up to 5)</label>
                   <c-input-group class="has-validation">
                     <span cInputGroupText><svg cIcon name="cilTags"></svg></span>
                     <select cFormControl
                             id="createRequiredSkills"
                             multiple
-                            size="5"
+                            size="5" 
                             class="form-select"
                             formControlName="requiredSkills"
                             aria-describedby="createSkillsHelp"
                             [ngClass]="{'is-invalid': isInvalid('requiredSkills')}">
+                      <!-- Do not set a default selected option here for multiple select with reactive forms -->
                       <option *ngFor="let skill of availableSkills" [value]="skill._id">
                         {{skill.name}}
                       </option>
@@ -177,13 +159,13 @@
               </c-col>
             </c-row>
 
-            <!-- Description row (Unchanged) -->
+            <!-- Description row -->
             <c-row class="mb-3">
               <c-col>
                 <label cLabel for="createDescription">Description</label>
                 <c-input-group class="has-validation">
                   <span cInputGroupText><svg cIcon name="cilDescription"></svg></span>
-                  <textarea cFormControl id="createDescription" formControlName="description"
+                  <textarea cFormControl id="createDescription" formControlName="description" 
                             placeholder="Project description..." rows="3"
                             [ngClass]="{'is-invalid': isInvalid('description')}"></textarea>
                   <c-form-feedback [valid]="false" *ngIf="isInvalid('description')">{{ getErrorMessage('description') }}</c-form-feedback>
@@ -194,92 +176,78 @@
             <hr class="my-3"/>
             <div class="d-flex justify-content-end gap-2">
               <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
-              <button cButton color="success" type="submit"
-                      [disabled]="createProjectForm.invalid">
+              <button cButton color="success" type="submit" 
+                      [disabled]="createProjectForm.invalid"> <!-- Submit disabled by form validity -->
                       Create Project
               </button>
             </div>
           </form>
         </div>
       </div>
-
+ 
       <!-- EDIT PROJECT MODAL / WIDGET -->
       <div *ngIf="isEditWidgetVisible && selectedProject"
            class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
            style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
         <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 90%; max-height: 90vh; overflow-y: auto;">
           <h3>Edit Project: {{ selectedProject.name }}</h3>
-          <!-- Pass selectedProject to the ngForm if you plan to use its properties for initial values or complex validation. -->
-          <form #editForm="ngForm" (ngSubmit)="onSaveChanges()">
+          <form #editForm="ngForm" (ngSubmit)="onSaveChanges()"> <!-- ngSubmit added -->
             <!-- Name and Manager row -->
             <c-row class="mb-3">
               <c-col md="6">
                 <label cLabel for="editProjectName">Project Name</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilFolder"></svg></span>
-                  <input cFormControl id="editProjectName" [(ngModel)]="selectedProject.name" name="editName" placeholder="Project Name" required />
+                  <input cFormControl id="editProjectName" [(ngModel)]="selectedProject.name" name="name" placeholder="Project Name" required />
                 </c-input-group>
-                <div *ngIf="editForm.controls['editName']?.invalid && (editForm.controls['editName']?.dirty || editForm.controls['editName']?.touched)" class="text-danger small">
-                    Project name is required.
-                </div>
+                <!-- Basic validation for template-driven can be added here if needed -->
               </c-col>
               <c-col md="6">
-                 <label cLabel for="editManager">Manager</label>
+                 <label cLabel for="editManagerName">Manager</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilUser"></svg></span>
-                  <!-- The ngModel selectedProject.manager is already an ID here due to onViewProject logic -->
-                  <select cFormControl id="editManager" [(ngModel)]="selectedProject.manager" name="editManager" class="form-select" required>
-                    <option value="" disabled>Select a Manager</option>
-                    <option *ngFor="let mgr of availableManagers" [value]="mgr._id">
-                      {{ mgr.firstName }} {{ mgr.lastName }}
-                    </option>
-                  </select>
+                  <input cFormControl id="editManagerName" [value]="selectedProject.manager.firstName + ' ' + selectedProject.manager.lastName" 
+                          placeholder="Manager Name" />
                 </c-input-group>
-<div *ngIf="editForm.controls['editManager']?.invalid && (editForm.controls['editManager']?.dirty || editForm.controls['editManager']?.touched)" class="text-danger small">
-                    Manager is required.
-                </div>
               </c-col>
             </c-row>
 
-            <!-- Dates row (Unchanged, but add name attributes for ngModel) -->
+            <!-- Dates row -->
             <c-row class="mb-3">
               <c-col md="6">
                 <label cLabel for="editStartDate">Start Date</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
-                  <input cFormControl id="editStartDate" [(ngModel)]="selectedProject.startDate" name="editStartDate" type="date" />
+                  <input cFormControl id="editStartDate" [(ngModel)]="selectedProject.startDate" name="startDate" type="date" />
                 </c-input-group>
               </c-col>
               <c-col md="6">
                  <label cLabel for="editEndDate">End Date</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
-                  <input cFormControl id="editEndDate" [(ngModel)]="selectedProject.endDate" name="editEndDate" type="date" />
+                  <input cFormControl id="editEndDate" [(ngModel)]="selectedProject.endDate" name="endDate" type="date" />
                 </c-input-group>
               </c-col>
             </c-row>
 
-            <!-- Status and Skills row (Unchanged, but add name attributes for ngModel. Align status options) -->
+            <!-- Status and Skills row -->
             <c-row class="mb-3">
               <c-col md="4">
                 <label cLabel for="editStatus">Status</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilList"></svg></span>
-                  <select cFormControl id="editStatus" [(ngModel)]="selectedProject.status" name="editStatus" class="form-select" required>
+                  <select cFormControl id="editStatus" [(ngModel)]="selectedProject.status" name="status" class="form-select">
                     <option value="Ouvert">Ouvert</option>
                     <option value="En cours">En cours</option>
-                    <option value="Complété">Complété</option> <!-- Aligned with schema -->
+                    <option value="En attente">En attente</option>
                   </select>
                 </c-input-group>
-                <div *ngIf="editForm.controls['editStatus']?.invalid && (editForm.controls['editStatus']?.dirty || editForm.controls['editStatus']?.touched)" class="text-danger small">
-                    Status is required.
-                </div>
               </c-col>
               <c-col md="8">
                 <label cLabel for="editRequiredSkills">Required Skills</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilTags"></svg></span>
-                  <select cFormControl multiple
+                  <select cFormControl multiple 
                           size="5"
                           class="form-select"
                           id="editRequiredSkills"
@@ -293,26 +261,29 @@
                 </c-input-group>
                 <small id="editSkillsHelp" class="form-text text-muted d-block mt-1">
                   Hold Ctrl (or Cmd on Mac) to select multiple skills.
+                  <!-- Note: Max skills validation is not automatically applied here like in the reactive form. -->
+                  <!-- You would need a custom directive for template-driven forms or convert this form to reactive for that. -->
                 </small>
               </c-col>
             </c-row>
 
-            <!-- Description row (Unchanged, but add name attribute for ngModel) -->
+            <!-- Description row -->
             <c-row class="mb-3">
               <c-col>
                 <label cLabel for="editDescription">Description</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilDescription"></svg></span>
-                  <textarea cFormControl id="editDescription" [(ngModel)]="selectedProject.description" name="editDescription"
+                  <textarea cFormControl id="editDescription" [(ngModel)]="selectedProject.description" name="description" 
                             placeholder="Description" rows="3"></textarea>
                 </c-input-group>
               </c-col>
             </c-row>
 
             <hr class="my-3"/>
+            <!-- Buttons -->
             <div class="d-flex justify-content-end gap-2">
               <button cButton color="secondary" type="button" (click)="onCloseWidget()">Cancel</button>
-              <button cButton color="primary" type="submit" [disabled]="editForm.invalid || !isEditFormValid()">Save Changes</button>
+              <button cButton color="primary" type="submit" [disabled]="editForm.invalid">Save Changes</button> <!-- Basic ngForm validation -->
             </div>
           </form>
         </div>

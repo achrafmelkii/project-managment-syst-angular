@@ -1,1 +1,111 @@
-<p>calendar works!</p>
+<!-- Wrapping div for loading/error states -->
+<div>
+  <!-- Optional: Add a general title if this component is used standalone on a page -->
+  <!-- <h1>Calendrier Général</h1> -->
+
+  <div *ngIf="isLoading" class="text-center" style="padding: 20px;">
+    <p>Chargement du calendrier...</p>
+    <!-- You can add a spinner component here if you have one, e.g., CoreUI spinner -->
+    <!-- <c-spinner></c-spinner> -->
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorLoading && !isLoading" class="alert alert-danger" role="alert">
+    {{ errorLoading }}
+  </div>
+
+  <!-- Main calendar content, shown when not loading and no error -->
+  <div *ngIf="!isLoading && !errorLoading">
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <div class="nav-buttons">
+          <button (click)="goToToday()" class="btn btn-outline-secondary">Aujourd'hui</button>
+          <button (click)="previousMonth()" class="btn btn-outline-secondary">Précédent</button>
+          <button (click)="nextMonth()" class="btn btn-outline-secondary">Suivant</button>
+        </div>
+        <h2 class="month-year">{{ monthYearDisplay }}</h2>
+        <!-- View buttons are commented out as per your provided HTML, uncomment if needed -->
+        <!--
+        <div class="view-buttons">
+          <button class="btn btn-secondary">Mois</button>
+          <button class="btn btn-outline-secondary" (click)="setView('Semaine')">Semaine</button>
+          <button class="btn btn-outline-secondary" (click)="setView('Jour')">Jour</button>
+          <button class="btn btn-outline-secondary" (click)="setView('Agenda')">Agenda</button>
+        </div>
+        -->
+      </div>
+
+      <table class="calendar-grid">
+        <thead>
+          <tr>
+            <!-- dayNames will be used from the component's public readonly dayNames -->
+            <th *ngFor="let dayName of dayNames">{{ dayName }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let week of weeks">
+            <td *ngFor="let day of week"
+                [class.other-month]="!day.isCurrentMonth"
+                [class.today]="day.isToday"
+                [class.weekend]="day.isWeekend"
+                [class.has-events]="day.events.length > 0">
+              <div class="day-number">{{ day.dayOfMonth }}</div>
+              <div class="events-container" *ngIf="day.isCurrentMonth && day.events.length > 0">
+                <ng-container *ngFor="let event of day.events">
+                  <div class="event-indicator"
+                       [style.background-color]="event.color"
+                       [title]="event.name + ' (' + (event.startDate ) + ' - ' + (event.endDate ) + ')'">
+                    {{ event.name  }}{{ event.name.length > 15 ? '...' : '' }}
+                  </div>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- <div class="calendar-container">
+  <div class="calendar-header">
+    <div class="nav-buttons">
+      <button (click)="goToToday()" class="btn btn-outline-secondary">Aujourd'hui</button>
+      <button (click)="previousMonth()" class="btn btn-outline-secondary">Précédent</button>
+      <button (click)="nextMonth()" class="btn btn-outline-secondary">Suivant</button>
+    </div>
+    <h2 class="month-year">{{ monthYearDisplay | titlecase }}</h2>
+
+  </div>
+
+  <table class="calendar-grid">
+    <thead>
+      <tr>
+        <th *ngFor="let dayName of dayNames">{{ dayName }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let week of weeks">
+        <td *ngFor="let day of week"
+            [class.other-month]="!day.isCurrentMonth"
+            [class.today]="day.isToday"
+            [class.weekend]="day.isWeekend"
+            [class.has-events]="day.events.length > 0">
+          <div class="day-number">{{ day.dayOfMonth }}</div>
+          <div class="events-container" *ngIf="day.isCurrentMonth && day.events.length > 0">
+            <ng-container *ngFor="let event of day.events">
+              <div class="event-indicator"
+                   [style.background-color]="event.color"
+                   [title]="event.name + ' (' + (event.startDate | date:'dd/MM') + ' - ' + (event.endDate | date:'dd/MM') + ')'">
+                {{ event.name | slice:0:15 }}{{ event.name.length > 15 ? '...' : '' }}
+              </div>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div> -->

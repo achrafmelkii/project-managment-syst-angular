@@ -61,6 +61,32 @@ export class UserService {
   //   });
   // }
 
+  getUsersByRole(
+    role: string,
+    page: number = 1,
+    pageSize: number = 10
+  ): Observable<UserListResponse> {
+    let endpoint: string;
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    switch (role) {
+      case 'manager':
+        endpoint = `${this.apiUrl}/users/managers`;
+        break;
+      case 'employee':
+        endpoint = `${this.apiUrl}/users/employees`;
+        break;
+      default:
+        throw new Error('Invalid role specified');
+    }
+
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<UserListResponse>(endpoint, { params, headers });
+  }
+
   getEmployeList(filter: { page?: number }): Observable<any> {
     const token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

@@ -22,7 +22,7 @@ import {
   TableDirective,
   ButtonModule,
 } from '@coreui/angular';
-import { Skill } from 'src/app/services/skills.service';
+import { Skill } from '../../services/skills.service';
 interface Project {
   _id: string;
   name: string;
