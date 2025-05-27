@@ -9,7 +9,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-
+import { IconModule } from '@coreui/icons-angular';
 import {
   SpinnerComponent,
   CardComponent,
@@ -21,6 +21,7 @@ import {
   ButtonDirective,
   TableDirective,
   ButtonModule,
+  InputGroupTextDirective,
 } from '@coreui/angular';
 import { Skill, SkillsService } from '../../services/skills.service';
 interface Project {
@@ -58,6 +59,8 @@ interface Project {
     ButtonDirective,
     TableDirective,
     ButtonModule,
+    IconModule,
+    InputGroupTextDirective,
   ],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss',

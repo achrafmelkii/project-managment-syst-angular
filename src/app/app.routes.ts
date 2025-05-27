@@ -113,7 +113,9 @@ export const routes: Routes = [
           {
             path: 'tasks',
             loadChildren: () =>
-              import('./views/tasks-list/routes').then((m) => m.routes),
+              import('./views/consultant-tasks-list/routes').then(
+                (m) => m.routes
+              ),
           },
           {
             path: 'profile',

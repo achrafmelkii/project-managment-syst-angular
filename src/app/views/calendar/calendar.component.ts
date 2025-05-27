@@ -65,7 +65,8 @@ export class CalendarComponent implements OnInit {
       if (p && p.startDate && p.endDate) {
         this.allEvents.push({
           id: p._id,
-          name: `Projet: ${p.name}`,
+          name: `${p.manager.firstName || ''} (${p.name})`, // Added description if available
+          // name: `Projet: ${p.name}`,
           startDate: new Date(p.startDate),
           endDate: new Date(p.endDate),
           type: 'project',

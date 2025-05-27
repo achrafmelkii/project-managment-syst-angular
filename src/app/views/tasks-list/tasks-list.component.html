@@ -3,18 +3,116 @@
     <c-card-header>
       <strong>Task Management</strong>
     </c-card-header>
+    
     <c-card-body style="position: relative;">
       <p class="text-body-secondary small">
         View and manage your assigned tasks.
       </p>
-
+  <button cButton color="primary" (click)="openCreateTaskModal()">
+    Create New Task
+  </button>
+      
       <c-input-group class="mb-3" style="max-width: 300px;">
         <span cInputGroupText>
-          <svg cIcon name="cil-magnifying-glass"></svg>
+         <svg cIcon name="cil-magnifying-glass"></svg>
         </span>
         <input cFormControl type="text" [value]="searchTerm" (input)="onSearch($event)" placeholder="Search tasks..." />
+        
       </c-input-group>
 
+
+
+      <!-- Create Task Modal -->
+<div *ngIf="isCreateModalOpen"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 95%;">
+    <div class="d-flex justify-content-between mb-3">
+      <h4>Create New Task</h4>
+      <button cButton color="secondary" size="sm" (click)="closeCreateTaskModal()">
+        Close
+      </button>
+    </div>
+
+    <form [formGroup]="createTaskForm" (ngSubmit)="createTask()">
+  <!-- Title Field -->
+  <div class="mb-3">
+    <label cLabel for="title">Title</label>
+    <input cFormControl
+           id="title"
+           formControlName="title"
+           placeholder="Enter task title"
+           [ngClass]="{'is-invalid': createTaskForm.get('title')?.invalid && createTaskForm.get('title')?.touched}" />
+    <div class="invalid-feedback" *ngIf="createTaskForm.get('title')?.invalid && createTaskForm.get('title')?.touched">
+      Title is required
+    </div>
+  </div>
+
+    <!-- Employee Assignment Field -->
+  <div class="mb-3">
+    <label cLabel for="assignedTo">Assign To Employee</label>
+    <select cFormControl
+            id="assignedTo"
+            formControlName="assignedTo"
+            [ngClass]="{'is-invalid': createTaskForm.get('assignedTo')?.invalid && createTaskForm.get('assignedTo')?.touched}">
+      <option value="">Select an employee</option>
+      <option *ngFor="let employee of availableEmployees" [value]="employee._id">
+        {{employee.firstName}} {{employee.lastName}}
+      </option>
+    </select>
+    <div class="invalid-feedback" *ngIf="createTaskForm.get('assignedTo')?.invalid && createTaskForm.get('assignedTo')?.touched">
+      Please select an employee
+    </div>
+  </div>
+
+      <div class="mb-3">
+        <label cLabel for="project">Project</label>
+        <select cFormControl
+                id="project"
+                formControlName="project"
+                [ngClass]="{'is-invalid': createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched}">
+          <option value="">Select a project</option>
+          <option *ngFor="let project of availableProjects" [value]="project._id">
+            {{project.name}}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched">
+          Project is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label cLabel for="description">Description</label>
+        <textarea cFormControl
+                  id="description"
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Enter task description"
+                  [ngClass]="{'is-invalid': createTaskForm.get('description')?.invalid && createTaskForm.get('description')?.touched}">
+        </textarea>
+        <div class="invalid-feedback" *ngIf="createTaskForm.get('description')?.invalid && createTaskForm.get('description')?.touched">
+          Description is required
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label cLabel for="status">Status</label>
+        <select cFormControl
+                id="status"
+                formControlName="status">
+          <option value="Ouvert">Ouvert</option>
+          <option value="En cours">En cours</option>
+          <option value="Complété">Complété</option>
+        </select>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" type="button" (click)="closeCreateTaskModal()">Cancel</button>
+        <button cButton color="primary" type="submit" [disabled]="createTaskForm.invalid">Create Task</button>
+      </div>
+    </form>
+  </div>
+</div>
       <table cTable>
         <thead>
           <tr>
@@ -42,6 +140,9 @@
                 <button cButton color="primary" (click)="openTaskModal(task)">
                   View
                 </button>
+                 <button cButton color="warning" (click)="openEditTaskModal(task)">
+                  Edit
+                </button>
               </div>
             </td>
           </tr>
@@ -68,6 +169,103 @@
         </button>
       </div>
 
+      <!-- Edit Task Modal -->
+<div *ngIf="isEditModalOpen && selectedTask"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 95%;">
+    <div class="d-flex justify-content-between mb-3">
+      <h4>Edit Task</h4>
+      <button cButton color="secondary" size="sm" (click)="closeEditTaskModal()">
+        Close
+      </button>
+    </div>
+
+    <form [formGroup]="editTaskForm" (ngSubmit)="updateTask()">
+      <!-- Title Field -->
+      <div class="mb-3">
+        <label cLabel for="editTitle">Title</label>
+        <input cFormControl
+               id="editTitle"
+               formControlName="title"
+               placeholder="Enter task title"
+               [ngClass]="{'is-invalid': editTaskForm.get('title')?.invalid && editTaskForm.get('title')?.touched}" />
+        <div class="invalid-feedback" *ngIf="editTaskForm.get('title')?.invalid && editTaskForm.get('title')?.touched">
+          Title is required
+        </div>
+      </div>
+
+      <!-- Project Field -->
+      <div class="mb-3">
+        <label cLabel for="editProject">Project</label>
+        <select cFormControl
+                id="editProject"
+                formControlName="project"
+                [ngClass]="{'is-invalid': editTaskForm.get('project')?.invalid && editTaskForm.get('project')?.touched}">
+          <option value="">Select a project</option>
+          <option *ngFor="let project of availableProjects" [value]="project._id">
+            {{project.name}}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="editTaskForm.get('project')?.invalid && editTaskForm.get('project')?.touched">
+          Project is required
+        </div>
+      </div>
+
+      <!-- Assigned To Field -->
+      <div class="mb-3">
+        <label cLabel for="editAssignedTo">Assign To Employee</label>
+        <select cFormControl
+                id="editAssignedTo"
+                formControlName="assignedTo"
+                [ngClass]="{'is-invalid': editTaskForm.get('assignedTo')?.invalid && editTaskForm.get('assignedTo')?.touched}">
+          <option value="">Select an employee</option>
+          <option *ngFor="let employee of availableEmployees" [value]="employee._id">
+            {{employee.firstName}} {{employee.lastName}}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="editTaskForm.get('assignedTo')?.invalid && editTaskForm.get('assignedTo')?.touched">
+          Please select an employee
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="mb-3">
+        <label cLabel for="editDescription">Description</label>
+        <textarea cFormControl
+                  id="editDescription"
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Enter task description"
+                  [ngClass]="{'is-invalid': editTaskForm.get('description')?.invalid && editTaskForm.get('description')?.touched}">
+        </textarea>
+        <div class="invalid-feedback" *ngIf="editTaskForm.get('description')?.invalid && editTaskForm.get('description')?.touched">
+          Description is required
+        </div>
+      </div>
+
+      <!-- Status Field -->
+      <div class="mb-3">
+        <label cLabel for="editStatus">Status</label>
+        <select cFormControl
+                id="editStatus"
+                formControlName="status">
+          <option value="Ouvert">Ouvert</option>
+          <option value="En cours">En cours</option>
+          <option value="Complété">Complété</option>
+        </select>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" type="button" (click)="closeEditTaskModal()">Cancel</button>
+        <button cButton color="primary" type="submit" [disabled]="editTaskForm.invalid">Update Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
       <!-- Task View Modal -->
       <div *ngIf="isModalOpen"
            class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -87,9 +285,9 @@
             </div>
             <div class="col-md-6 border-start ps-3">
               <p><strong>Created By:</strong></p>
-              <div class="d-flex align-items-center mb-2">
-                <img [src]="selectedTask?.createdBy?.image" class="rounded-circle me-2" width="32" height="32">
-                <span>{{ selectedTask?.createdBy?.firstName }} {{ selectedTask?.createdBy?.lastName }}</span>
+              <div class="d-flex align-items-center mb-2" *ngIf="taskCreator">
+                <img [src]="taskCreator?.image" class="rounded-circle me-2" width="32" height="32">
+                <span>{{ taskCreator?.firstName }} {{ taskCreator?.lastName }}</span>
               </div>
               <p><strong>Status:</strong>
                 <span [class]="'px-2 py-1 rounded-full text-sm ' + getStatusColor(selectedTask?.status)">

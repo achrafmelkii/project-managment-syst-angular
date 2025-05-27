@@ -136,7 +136,7 @@
 
             <!-- Status and Skills row (Unchanged, ensure status options align with schema) -->
             <c-row class="mb-3">
-              <c-col md="4">
+              <!-- <c-col md="4">
                 <label cLabel for="createStatus">Status</label>
                 <c-input-group class="has-validation">
                   <span cInputGroupText><svg cIcon name="cilList"></svg></span>
@@ -144,11 +144,11 @@
                           [ngClass]="{'is-invalid': isInvalid('status')}">
                     <option value="Ouvert">Ouvert</option>
                     <option value="En cours">En cours</option>
-                    <option value="Complété">Complété</option> <!-- Aligned with schema -->
+                    <option value="Complété">Complété</option> 
                   </select>
                    <c-form-feedback [valid]="false" *ngIf="isInvalid('status')">{{ getErrorMessage('status') }}</c-form-feedback>
                 </c-input-group>
-              </c-col>
+              </c-col> -->
               <c-col md="8">
                 <div class="mb-0">
                   <label cLabel for="createRequiredSkills">Required Skills (Select up to 5)</label>
@@ -261,20 +261,20 @@
 
             <!-- Status and Skills row (Unchanged, but add name attributes for ngModel. Align status options) -->
             <c-row class="mb-3">
-              <c-col md="4">
+              <!-- <c-col md="4">
                 <label cLabel for="editStatus">Status</label>
                 <c-input-group>
                   <span cInputGroupText><svg cIcon name="cilList"></svg></span>
                   <select cFormControl id="editStatus" [(ngModel)]="selectedProject.status" name="editStatus" class="form-select" required>
                     <option value="Ouvert">Ouvert</option>
                     <option value="En cours">En cours</option>
-                    <option value="Complété">Complété</option> <!-- Aligned with schema -->
+                    <option value="Complété">Complété</option> 
                   </select>
                 </c-input-group>
                 <div *ngIf="editForm.controls['editStatus']?.invalid && (editForm.controls['editStatus']?.dirty || editForm.controls['editStatus']?.touched)" class="text-danger small">
                     Status is required.
                 </div>
-              </c-col>
+              </c-col> -->
               <c-col md="8">
                 <label cLabel for="editRequiredSkills">Required Skills</label>
                 <c-input-group>

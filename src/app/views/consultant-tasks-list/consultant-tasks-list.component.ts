@@ -71,10 +71,10 @@ import { ProjectsService } from '../../services/projects.service';
     SpinnerComponent,
     IconModule,
   ],
-  templateUrl: './tasks-list.component.html',
-  styleUrl: './tasks-list.component.scss',
+  templateUrl: './consultant-tasks-list.component.html',
+  styleUrl: './consultant-tasks-list.component.scss',
 })
-export class TasksListComponent implements OnInit {
+export class ConsultantTasksListComponent implements OnInit {
   tasks: Task[] = [];
   isLoading = false;
   page = 1;

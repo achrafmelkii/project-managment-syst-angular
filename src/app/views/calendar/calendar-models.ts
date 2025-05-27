@@ -15,6 +15,7 @@ export interface ProjectInput {
   name: string;
   startDate: string | Date; // Backend might send as string
   endDate: string | Date;
+  manager: { _id: string; firstName: string; lastName: string }; // Example: might need manager name
 }
 
 export interface AssignmentInput {
