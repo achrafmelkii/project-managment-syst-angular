@@ -47,10 +47,10 @@
               <div class="events-container" *ngIf="day.isCurrentMonth && day.events.length > 0">
                 <ng-container *ngFor="let event of day.events">
                   <div class="event-indicator"
-                       [style.background-color]="event.color"
-                       [title]="event.name + ' (' + (event.startDate ) + ' - ' + (event.endDate ) + ')'">
-                    {{ event.name  }}{{ event.name.length > 15 ? '...' : '' }}
-                  </div>
+     [style.background-color]="event.color"
+     [title]="event.name + ' (' + (event.startDate ) + ' - ' + (event.endDate ) + ')'">
+  {{ event.name }}{{ event.name.length > 15 ? '...' : '' }}
+</div>
                 </ng-container>
               </div>
             </td>

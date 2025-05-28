@@ -16,6 +16,20 @@ export class ProjectsService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
+  getEmployeProjectsList(
+    page: number = 1,
+    pageSize: number = 10 // Make sure pageSize is also passed if you want to control it
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    let params = new HttpParams();
+
+    // Add page and pageSize to the query parameters
+    params = params.set('page', page.toString());
+    params = params.set('pageSize', pageSize.toString());
+
+    return this.http.get(`${this.apiUrl}/employe`, { headers, params }); // Pass params here
+  }
+
   // Get List of Projects with Optional Filtering
   getProjectsList(filter: { name?: string; page?: number }): Observable<any> {
     const headers = this.getAuthHeaders();

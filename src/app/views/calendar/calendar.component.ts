@@ -58,6 +58,65 @@ export class CalendarComponent implements OnInit {
     this.loadCalendarData();
   }
 
+  // Add these color arrays
+  private readonly blueColors = [
+    '#ADD8E6',
+    '#00BFFF',
+    '#1E90FF',
+    '#4169E1',
+    '#0000FF',
+    '#000080',
+  ];
+
+  private readonly greenColors = [
+    '#98FB98',
+
+    '#32CD32',
+    '#3CB371',
+
+    '#228B22',
+
+    '#9ACD32',
+    '#6B8E23',
+  ];
+
+  private readonly redColors = [
+    '#FFB6C1',
+
+    '#FF1 493',
+
+    '#8B0000',
+
+    '#FF4500',
+    '#FF0000',
+  ];
+
+  // Add this helper method
+  private getEventColor(event: CalendarEvent): string {
+    const now = new Date();
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+
+    // Get random color from array
+    const getRandomColor = (colors: string[]) => {
+      const randomIndex = Math.floor(Math.random() * colors.length);
+      return colors[randomIndex];
+    };
+
+    // Not started yet
+    if (startDate > now) {
+      return getRandomColor(this.blueColors);
+    }
+    // Currently active
+    else if (startDate <= now && endDate >= now) {
+      return getRandomColor(this.greenColors);
+    }
+    // Completed/Past
+    else {
+      return getRandomColor(this.redColors);
+    }
+  }
+
   // Renamed from processInputEvents - processes internal data
   private processFetchedData(): void {
     this.allEvents = [];
@@ -70,12 +129,19 @@ export class CalendarComponent implements OnInit {
           startDate: new Date(p.startDate),
           endDate: new Date(p.endDate),
           type: 'project',
-          color: '#ADD8E6', // Light blue for projects
+          color: this.getEventColor({
+            id: p._id,
+            name: p.name,
+            startDate: new Date(p.startDate),
+            endDate: new Date(p.endDate),
+            type: 'project',
+          }),
           originalData: p,
         });
       }
     });
 
+    // Similar modification for assignments
     (this.assignmentsInternal || []).forEach((a) => {
       if (a && a.startDate && a.endDate && a.user && a.project) {
         const startDate = new Date(a.startDate);
@@ -83,15 +149,20 @@ export class CalendarComponent implements OnInit {
         if (endDate < startDate) {
           endDate = new Date(startDate);
         }
-        this.allEvents.push({
+
+        const event: CalendarEvent = {
           id: a._id,
           name: `Affectation: ${a.user.firstName || ''} ${
             a.user.lastName || ''
           } sur ${a.project.name || 'N/A'}`,
           startDate: startDate,
           endDate: endDate,
-          type: 'assignment',
-          color: '#90EE90', // Light green for assignments
+          type: 'assignment' as 'assignment',
+        };
+
+        this.allEvents.push({
+          ...event,
+          color: this.getEventColor(event),
           originalData: a,
         });
       }

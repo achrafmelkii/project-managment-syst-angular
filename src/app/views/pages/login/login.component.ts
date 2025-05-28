@@ -113,11 +113,6 @@ export class LoginComponent {
       },
     });
   }
-  goToRegister() {
-    console.log('Navigating to register page');
-
-    this.router.navigate(['/register']);
-  }
 
   goToDashboard() {
     console.log('Navigating to dashboard page');

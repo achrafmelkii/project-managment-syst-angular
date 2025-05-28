@@ -1,59 +1,46 @@
 <c-col xs="12">
   <c-card class="mb-4">
     <c-card-header>
-      <strong>Projects Table</strong>
+      <strong>My Projects</strong>
     </c-card-header>
     <c-card-body style="position: relative;">
-      <p class="text-body-secondary small">
-        Displaying project information dynamically
-      </p>
-      <c-input-group class="mb-3" style="max-width: 300px;">
-        <span cInputGroupText>
-          <svg cIcon name="cilSearch"></svg>
-        </span>
-        <input cFormControl type="text" (input)="handleSearch($event)" placeholder="Search projects..." />
-      </c-input-group>
-
       <table cTable>
         <thead>
           <tr>
             <th>#</th>
             <th>Project Name</th>
-            <th>Skills</th>
-            <th>Members </th>
-        
-            <th>Created At</th>
+            <th>Required Skills</th>
+            <th>Team Size</th>
+            <th>Manager</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-       <tr *ngFor="let project of projects; let i = index">
-  <th scope="row">{{ i + 1 }}</th>
-  <td>{{ project.name }}</td>
-  <td>
-    <div class="d-flex flex-wrap gap-1">
-      <span *ngFor="let skill of project.requiredSkills" 
-            class="badge bg-info text-white me-1">
-        {{ skill.name }}
-      </span>
-    </div>
-  </td>
-  <td>
-    <span class="badge bg-primary">
-      {{ project.users.length }} users
-    </span>
-  </td>
-
-  <td>{{ project.createdAt | date }}</td>
-  <td>
-    <div class="d-md-flex mx-auto">
-      <div class="d-flex gap-2">
-        <button cButton color="primary" (click)="onViewProject(project)">View</button>
-        <button cButton color="danger" (click)="deleteProject(project)">Affect</button>
-      </div>
-    </div>
-  </td>
-</tr>
+          <tr *ngFor="let project of projects; let i = index">
+            <th scope="row">{{ i + 1 }}</th>
+            <td>{{ project.name }}</td>
+            <td>
+              <div class="d-flex flex-wrap gap-1">
+                <span *ngFor="let skill of project.requiredSkills" 
+                      class="badge bg-info text-white me-1">
+                  {{ skill.name }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-primary">
+                {{ project.users.length }} members
+              </span>
+            </td>
+            <td>
+              {{ project.manager.firstName }} {{ project.manager.lastName }}
+            </td>
+            <td>
+              <button cButton color="primary" (click)="onViewProject(project)">
+                View Details
+              </button>
+            </td>
+          </tr>
         </tbody>
       </table>
 
@@ -61,6 +48,7 @@
         <c-spinner color="primary" label="Loading..."></c-spinner>
       </div>
 
+      <!-- Pagination -->
       <div class="d-flex justify-content-center mt-3">
         <div class="d-flex gap-2">
           <button
@@ -73,8 +61,59 @@
           </button>
         </div>
       </div>
-      
- 
+
+      <!-- View Project Modal -->
+      <div *ngIf="isViewModalOpen && selectedProject"
+           class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+           style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+        <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 95%;">
+          <div class="d-flex justify-content-between mb-3">
+            <h4>Project Details</h4>
+            <button cButton color="secondary" size="sm" (click)="closeViewModal()">
+              Close
+            </button>
+          </div>
+
+          <div class="project-details">
+            <h5>{{ selectedProject.name }}</h5>
+            <p class="text-muted">{{ selectedProject.description }}</p>
+
+            <div class="mb-3">
+              <strong>Duration:</strong>
+              <p>{{ selectedProject.startDate | date }} - {{ selectedProject.endDate | date }}</p>
+            </div>
+
+            <div class="mb-3">
+              <strong>Manager:</strong>
+              <p>{{ selectedProject.manager.firstName }} {{ selectedProject.manager.lastName }}</p>
+              <small class="text-muted">{{ selectedProject.manager.email }}</small>
+            </div>
+
+            <div class="mb-3">
+              <strong>Required Skills:</strong>
+              <div class="d-flex flex-wrap gap-1 mt-1">
+                <span *ngFor="let skill of selectedProject.requiredSkills" 
+                      class="badge bg-info text-white">
+                  {{ skill.name }}
+                </span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <strong>Team Members:</strong>
+              <div class="mt-2">
+                <div *ngFor="let user of selectedProject.users" class="d-flex align-items-center mb-1">
+                  <img [src]="user.image" 
+                       [alt]="user.firstName"
+                       class="rounded-circle me-2"
+                       style="width: 30px; height: 30px; object-fit: cover;">
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </c-card-body>
   </c-card>
 </c-col>
