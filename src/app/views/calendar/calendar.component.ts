@@ -1,18 +1,18 @@
 // src/app/custom-calendar/calendar.component.ts
 import { Component, OnInit } from '@angular/core'; // Removed Input, OnChanges, SimpleChanges
 import { CommonModule, DatePipe } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 
 // Models - ensure this path is correct
-import {
-  CalendarEvent,
-  ProjectInput,
-  AssignmentInput,
-} from './calendar-models';
+import { CalendarEvent, ProjectInput } from './calendar-models';
 
 // Services - ensure these paths are correct
 import { ProjectsService } from '../../services/projects.service';
-import { AssignmentService } from '../../services/assignment.service';
+import {
+  AssignmentInput,
+  AssignmentService,
+} from '../../services/assignment.service';
+import { AuthService } from '../../services/auth.service';
 
 interface CalendarDay {
   date: Date;
@@ -51,7 +51,8 @@ export class CalendarComponent implements OnInit {
   constructor(
     private datePipe: DatePipe,
     private projectsService: ProjectsService, // Injected service
-    private assignmentService: AssignmentService // Injected service
+    private assignmentService: AssignmentService, // Injected service
+    private authService: AuthService // Injected service for authentication
   ) {}
 
   ngOnInit(): void {
@@ -70,12 +71,9 @@ export class CalendarComponent implements OnInit {
 
   private readonly greenColors = [
     '#98FB98',
-
     '#32CD32',
     '#3CB371',
-
     '#228B22',
-
     '#9ACD32',
     '#6B8E23',
   ];
@@ -117,7 +115,58 @@ export class CalendarComponent implements OnInit {
     }
   }
 
-  // Renamed from processInputEvents - processes internal data
+  // // Renamed from processInputEvents - processes internal data
+  // private processFetchedData(): void {
+  //   this.allEvents = [];
+  //   (this.projectsInternal || []).forEach((p) => {
+  //     if (p && p.startDate && p.endDate) {
+  //       this.allEvents.push({
+  //         id: p._id,
+  //         name: `${p.manager.firstName || ''} (${p.name})`, // Added description if available
+  //         // name: `Projet: ${p.name}`,
+  //         startDate: new Date(p.startDate),
+  //         endDate: new Date(p.endDate),
+  //         type: 'project',
+  //         color: this.getEventColor({
+  //           id: p._id,
+  //           name: p.name,
+  //           startDate: new Date(p.startDate),
+  //           endDate: new Date(p.endDate),
+  //           type: 'project',
+  //         }),
+  //         originalData: p,
+  //       });
+  //     }
+  //   });
+
+  //   // Similar modification for assignments
+  //   (this.assignmentsInternal || []).forEach((a) => {
+  //     if (a && a.startDate && a.endDate && a.user && a.project) {
+  //       const startDate = new Date(a.startDate);
+  //       let endDate = new Date(a.endDate);
+  //       if (endDate < startDate) {
+  //         endDate = new Date(startDate);
+  //       }
+
+  //       const event: CalendarEvent = {
+  //         id: a._id,
+  //         name: `Affectation: ${a.user.firstName || ''} ${
+  //           a.user.lastName || ''
+  //         } sur ${a.project.name || 'N/A'}`,
+  //         startDate: startDate,
+  //         endDate: endDate,
+  //         type: 'assignment' as 'assignment',
+  //       };
+
+  //       this.allEvents.push({
+  //         ...event,
+  //         color: this.getEventColor(event),
+  //         originalData: a,
+  //       });
+  //     }
+  //   });
+  // }
+
   private processFetchedData(): void {
     this.allEvents = [];
     (this.projectsInternal || []).forEach((p) => {
@@ -143,7 +192,7 @@ export class CalendarComponent implements OnInit {
 
     // Similar modification for assignments
     (this.assignmentsInternal || []).forEach((a) => {
-      if (a && a.startDate && a.endDate && a.user && a.project) {
+      if (a && a.startDate && a.endDate && a.employee && a.projectName) {
         const startDate = new Date(a.startDate);
         let endDate = new Date(a.endDate);
         if (endDate < startDate) {
@@ -152,9 +201,9 @@ export class CalendarComponent implements OnInit {
 
         const event: CalendarEvent = {
           id: a._id,
-          name: `Affectation: ${a.user.firstName || ''} ${
-            a.user.lastName || ''
-          } sur ${a.project.name || 'N/A'}`,
+          name: `Affectation: ${a.employee || ''} ${a.employee || ''} sur ${
+            a.projectName || 'N/A'
+          }`,
           startDate: startDate,
           endDate: endDate,
           type: 'assignment' as 'assignment',
@@ -173,8 +222,19 @@ export class CalendarComponent implements OnInit {
     this.isLoading = true;
     this.errorLoading = null;
 
+    const userRole = this.authService.getUserRole();
+    let projectsObservable: Observable<any>;
+
+    if (userRole === 'employee') {
+      // If the user is an employee, fetch only their projects
+      projectsObservable = this.projectsService.getEmployeProjectsList(); // Assuming pagination is not needed for calendar directly
+    } else {
+      // For all other roles (manager, admin, etc.), fetch all projects
+      projectsObservable = this.projectsService.getProjectsList({}); // Fetch all projects
+    }
+
     forkJoin({
-      projects: this.projectsService.getProjectsList({}), // Fetch all projects
+      projects: projectsObservable, // Fetch all projects
       assignments: this.assignmentService.getAssignments(), // Fetch all assignments
     }).subscribe({
       next: (data) => {
@@ -305,274 +365,3 @@ export class CalendarComponent implements OnInit {
     // Future implementation
   }
 }
-
-// import {
-//   Component,
-//   OnInit,
-//   Input,
-//   OnChanges,
-//   SimpleChanges,
-// } from '@angular/core';
-// import { CommonModule, DatePipe } from '@angular/common';
-// import {
-//   CalendarEvent,
-//   ProjectInput,
-//   AssignmentInput,
-// } from './calendar-models'; // Adjust the import path as necessary
-
-// interface CalendarDay {
-//   date: Date;
-//   dayOfMonth: number;
-//   isCurrentMonth: boolean;
-//   isToday: boolean;
-//   isWeekend: boolean;
-//   events: CalendarEvent[];
-// }
-// // Add this after your imports
-// const SAMPLE_PROJECTS: ProjectInput[] = [
-//   {
-//     _id: 'p1',
-//     name: 'Project Alpha',
-//     startDate: '2025-05-15',
-//     endDate: '2025-05-28',
-//   },
-//   {
-//     _id: 'p2',
-//     name: 'Project Beta',
-//     startDate: '2025-05-20',
-//     endDate: '2025-06-05',
-//   },
-//   {
-//     _id: 'p3',
-//     name: 'Project Gamma',
-//     startDate: '2025-05-10',
-//     endDate: '2025-05-25',
-//   },
-// ];
-
-// const SAMPLE_ASSIGNMENTS: AssignmentInput[] = [
-//   {
-//     _id: 'a1',
-//     user: { _id: 'u1', firstName: 'John', lastName: 'Doe' },
-//     project: { _id: 'p1', name: 'Project Alpha' },
-//     startDate: '2025-05-15',
-//     endDate: '2025-05-20',
-//   },
-//   {
-//     _id: 'a2',
-//     user: { _id: 'u2', firstName: 'Jane', lastName: 'Smith' },
-//     project: { _id: 'p2', name: 'Project Beta' },
-//     startDate: '2025-05-22',
-//     endDate: '2025-05-28',
-//   },
-//   {
-//     _id: 'a3',
-//     user: { _id: 'u3', firstName: 'Mike', lastName: 'Johnson' },
-//     project: { _id: 'p3', name: 'Project Gamma' },
-//     startDate: '2025-05-12',
-//     endDate: '2025-05-18',
-//   },
-// ];
-
-// @Component({
-//   selector: 'app-custom-calendar',
-//   templateUrl: './calendar.component.html',
-//   styleUrls: ['./calendar.component.scss'],
-//   imports: [CommonModule], // Add CommonModule to imports
-
-//   providers: [DatePipe], // Add DatePipe here if you use it in the template
-// })
-// export class CalendarComponent implements OnInit, OnChanges {
-//   @Input() projects: ProjectInput[] = [];
-//   @Input() assignments: AssignmentInput[] = [];
-
-//   // Update your existing inputs with default values
-//   // @Input() projects: ProjectInput[] = SAMPLE_PROJECTS;
-//   // @Input() assignments: AssignmentInput[] = SAMPLE_ASSIGNMENTS;
-
-//   public currentDate: Date = new Date();
-//   public displayMonth: Date = new Date(); // The month currently being displayed
-//   public weeks: CalendarDay[][] = [];
-//   public readonly dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; // Or French: Dim, Lun, Mar...
-
-//   private allEvents: CalendarEvent[] = [];
-
-//   constructor(private datePipe: DatePipe) {}
-
-//   ngOnInit(): void {
-//     this.processInputEvents();
-//     this.generateCalendar();
-//   }
-
-//   ngOnChanges(changes: SimpleChanges): void {
-//     if (changes['projects'] || changes['assignments']) {
-//       this.processInputEvents();
-//       this.generateCalendar(); // Regenerate calendar if events change
-//     }
-//   }
-
-//   private processInputEvents(): void {
-//     this.allEvents = [];
-//     // Ensure projects and assignments are not null/undefined before processing
-//     (this.projects || []).forEach((p) => {
-//       if (p && p.startDate && p.endDate) {
-//         // Basic validation
-//         this.allEvents.push({
-//           id: p._id,
-//           name: `Projet: ${p.name}`,
-//           startDate: new Date(p.startDate), // Convert string dates to Date objects
-//           endDate: new Date(p.endDate),
-//           type: 'project',
-//           color: '#ADD8E6',
-//           originalData: p,
-//         });
-//       }
-//     });
-
-//     (this.assignments || []).forEach((a) => {
-//       if (a && a.startDate && a.endDate && a.user && a.project) {
-//         // Basic validation
-//         const startDate = new Date(a.startDate);
-//         let endDate = new Date(a.endDate);
-//         if (endDate < startDate) {
-//           endDate = new Date(startDate);
-//         }
-//         this.allEvents.push({
-//           id: a._id,
-//           name: `Affectation: ${a.user.firstName} ${a.user.lastName} sur ${a.project.name}`,
-//           startDate: startDate,
-//           endDate: endDate,
-//           type: 'assignment',
-//           color: '#90EE90',
-//           originalData: a,
-//         });
-//       }
-//     });
-//   }
-
-//   generateCalendar(): void {
-//     this.weeks = [];
-//     const year = this.displayMonth.getFullYear();
-//     const month = this.displayMonth.getMonth();
-
-//     const firstDayOfMonth = new Date(year, month, 1);
-//     const lastDayOfMonth = new Date(year, month + 1, 0);
-//     const numDaysInMonth = lastDayOfMonth.getDate();
-//     const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 (Sun) - 6 (Sat)
-
-//     let currentDay = new Date(firstDayOfMonth);
-//     currentDay.setDate(currentDay.getDate() - firstDayOfWeek); // Start from the first day of the first week
-
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0); // Normalize today for comparison
-
-//     for (let i = 0; i < 6; i++) {
-//       // Max 6 weeks for a month
-//       const week: CalendarDay[] = [];
-//       for (let j = 0; j < 7; j++) {
-//         const dateCopy = new Date(currentDay);
-//         dateCopy.setHours(0, 0, 0, 0); // Normalize for comparison
-
-//         const dayEvents = this.getEventsForDate(dateCopy);
-
-//         week.push({
-//           date: dateCopy,
-//           dayOfMonth: dateCopy.getDate(),
-//           isCurrentMonth: dateCopy.getMonth() === month,
-//           isToday: dateCopy.getTime() === today.getTime(),
-//           isWeekend: dateCopy.getDay() === 0 || dateCopy.getDay() === 6,
-//           events: dayEvents,
-//         });
-//         currentDay.setDate(currentDay.getDate() + 1);
-//       }
-//       this.weeks.push(week);
-//       // Optimization: if the first day of this week is already in the next month, and it's not the first week
-//       if (
-//         i > 0 &&
-//         week[0].date.getMonth() !== month &&
-//         week[0].date > lastDayOfMonth
-//       ) {
-//         // Optional: if last week is entirely in next month and there are already enough weeks.
-//         if (
-//           this.weeks.length > 4 &&
-//           this.weeks[this.weeks.length - 2][0].date.getMonth() === month
-//         ) {
-//           // Check if the previous week contained the end of the month
-//           const prevWeek = this.weeks[this.weeks.length - 2];
-//           if (
-//             prevWeek.some(
-//               (d) => d.isCurrentMonth && d.dayOfMonth === numDaysInMonth
-//             )
-//           ) {
-//             // If the previous week has the last day of the month, we can potentially remove the current empty week.
-//             // However, some months need 6 rows. Let's be safe and keep it simple for now, or add more complex logic.
-//             // For now, we'll always show 6 weeks to maintain a consistent grid size,
-//             // or break if the first day of the current week is past the current month's last day.
-//           }
-//         }
-//         if (week.every((d) => !d.isCurrentMonth) && this.weeks.length > 4) {
-//           // If the entire week is not the current month and we have at least 4 weeks,
-//           // we might be able to break, but this can lead to variable height.
-//           // The provided image always shows 6 rows.
-//         }
-//       }
-//     }
-//   }
-
-//   private getEventsForDate(date: Date): CalendarEvent[] {
-//     const checkDate = new Date(date); // Use a copy
-//     checkDate.setHours(0, 0, 0, 0);
-
-//     return this.allEvents.filter((event) => {
-//       const startDate = new Date(event.startDate);
-//       startDate.setHours(0, 0, 0, 0);
-//       const endDate = new Date(event.endDate);
-//       endDate.setHours(0, 0, 0, 0);
-//       return checkDate >= startDate && checkDate <= endDate;
-//     });
-//   }
-
-//   previousMonth(): void {
-//     this.displayMonth = new Date(
-//       this.displayMonth.getFullYear(),
-//       this.displayMonth.getMonth() - 1,
-//       1
-//     );
-//     this.generateCalendar();
-//   }
-
-//   nextMonth(): void {
-//     this.displayMonth = new Date(
-//       this.displayMonth.getFullYear(),
-//       this.displayMonth.getMonth() + 1,
-//       1
-//     );
-//     this.generateCalendar();
-//   }
-
-//   goToToday(): void {
-//     this.displayMonth = new Date();
-//     this.generateCalendar();
-//   }
-
-//   // Helper to get displayable month and year
-
-//   get monthYearDisplay(): string {
-//     return (
-//       this.datePipe.transform(
-//         this.displayMonth,
-//         'MMMM yyyy',
-//         '',
-//         this.getLocaleForDatePipe()
-//       ) || ''
-//     );
-//   }
-
-//   private getLocaleForDatePipe(): string {
-//     // Basic example, you might have a more robust i18n setup
-
-//     // For French month names with titlecase pipe
-
-//     return 'fr-FR';
-//   }
-// }

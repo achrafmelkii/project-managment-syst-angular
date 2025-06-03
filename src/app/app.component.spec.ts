@@ -5,10 +5,8 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        AppComponent
-      ],
-      providers: [provideRouter([])]
+      imports: [AppComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
@@ -21,6 +19,6 @@ describe('AppComponent', () => {
   it(`should have as title 'CoreUI Angular Admin Template'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('CoreUI Angular Admin Template');
+    expect(app.title).toEqual('User Managment System');
   });
 });

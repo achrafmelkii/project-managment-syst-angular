@@ -22,6 +22,9 @@ interface Project {
   startDate: string;
   endDate: string;
   status: string;
+  assignments: string[]; // Keep if you still use raw IDs for something else
+  tasks: any[]; // **Updated to expect populated task objects with title**
+
   requiredSkills: Skill[];
   users: any[];
   manager: {
@@ -75,6 +78,8 @@ export class ConsultantProjectListComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.projects = data.projects;
           this.pages = data.pages;
+          console.log('Fetched projects:', this.projects); // Debug log
+
           this.loading = false;
         },
         error: (error) => {

@@ -87,6 +87,28 @@ export class UserService {
     return this.http.get<UserListResponse>(endpoint, { params, headers });
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') || '';
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
+
+  getResponsiblesList(filter: any): Observable<any> {
+    const headers = this.getAuthHeaders();
+    let params = new HttpParams();
+
+    if (filter.name) {
+      params = params.set('name', filter.name);
+    }
+    if (filter.page) {
+      params = params.set('page', filter.page.toString());
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/users/responsibles`, {
+      headers,
+      params,
+    });
+  }
+
   getEmployeList(filter: { page?: number }): Observable<any> {
     const token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

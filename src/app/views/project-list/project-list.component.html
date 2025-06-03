@@ -53,7 +53,10 @@
     <div class="d-md-flex mx-auto">
       <div class="d-flex gap-2">
         <button cButton color="primary" (click)="onViewProject(project)">View</button>
-        <button cButton color="danger" (click)="deleteProject(project)">Affect</button>
+
+        <button cButton color="info" (click)="openAssignmentsModal(project)">
+        Assignments ({{ project.assignments?.length || 0 }})
+      </button>
       </div>
     </div>
   </td>
@@ -78,6 +81,317 @@
         </div>
       </div>
       
+
+ <!-- EDIT PROJECT MODAL / WIDGET -->
+     <div *ngIf="isEditWidgetVisible && selectedProject"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 800px; max-width: 90%; max-height: 90vh; overflow-y: auto;">
+    <h3>Project Details: {{ selectedProject.name }}</h3>
+    <form #editForm="ngForm" (ngSubmit)="onSaveChanges()">
+      <c-row class="mb-3">
+        <c-col md="6">
+          <label cLabel for="editProjectName">Project Name</label>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilFolder"></svg></span>
+            <input cFormControl id="editProjectName" [(ngModel)]="selectedProject.name" name="editName" placeholder="Project Name" required disabled />
+          </c-input-group>
+        </c-col>
+        <c-col md="6">
+          <label cLabel for="editManager">Manager</label>
+          <c-input-group *ngIf="selectedProject.manager"> <span cInputGroupText><svg cIcon name="cilUser"></svg></span>
+            <input cFormControl id="editManagerFirstName" [value]="selectedProject.manager.firstName + ' ' + selectedProject.manager.lastName" name="managerFullName" placeholder="Manager Name" required disabled />
+          </c-input-group>
+          <div *ngIf="!selectedProject.manager" class="text-muted mt-2">No manager assigned.</div>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col md="6">
+          <label cLabel for="editStartDate">Start Date</label>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl id="editStartDate" [ngModel]="selectedProject.startDate | date:'yyyy-MM-dd'" name="editStartDate" type="date" disabled />
+          </c-input-group>
+        </c-col>
+        <c-col md="6">
+          <label cLabel for="editEndDate">End Date</label>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilCalendar"></svg></span>
+            <input cFormControl id="editEndDate" [ngModel]="selectedProject.endDate | date:'yyyy-MM-dd'" name="editEndDate" type="date" disabled />
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+
+
+         <div class="mb-3">
+  <strong>Team Members:</strong>
+  <div class="mt-2">
+    <div *ngIf="!selectedProject?.users?.length" class="text-muted">
+      No team members assigned to this project.
+    </div>
+    <div *ngFor="let user of selectedProject?.users" class="d-flex align-items-center mb-1">
+      <img [src]="user.image"
+           [alt]="user?.firstName"
+           class="rounded-circle me-2"
+           style="width: 30px; height: 30px; object-fit: cover;">
+      <span>{{ user?.firstName }} {{ user?.lastName }}</span>
+      <small class="text-muted ms-2">({{ user?.email }})</small>
+    </div>
+  </div>
+</div>
+
+      <c-row class="mb-3">
+        <c-col>
+          <label cLabel for="viewRequiredSkills">Required Skills</label>
+          <div class="d-flex flex-wrap gap-1">
+            <span *ngIf="!selectedProject.requiredSkills || selectedProject.requiredSkills.length === 0" class="text-muted">No skills required.</span>
+            <span *ngFor="let skill of selectedProject.requiredSkills"
+                  class="badge bg-info text-white me-1">
+              {{ skill.name }}
+            </span>
+          </div>
+        </c-col>
+      </c-row>
+      <c-row class="mb-3">
+        <c-col>
+          <label cLabel for="viewProjectTasks">Project Tasks</label>
+          <div class="d-flex flex-wrap gap-1">
+            <span *ngIf="!selectedProject.tasks || selectedProject.tasks.length === 0" class="text-muted">No tasks assigned.</span>
+            <span *ngFor="let task of selectedProject.tasks"
+                  class="badge bg-secondary text-white me-1">
+              {{ task.title }}
+            </span>
+          </div>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col>
+          <label cLabel for="editDescription">Description</label>
+          <c-input-group>
+            <span cInputGroupText><svg cIcon name="cilDescription"></svg></span>
+            <textarea cFormControl id="editDescription" [(ngModel)]="selectedProject.description" name="editDescription"
+                      placeholder="Description" rows="3" disabled></textarea>
+          </c-input-group>
+        </c-col>
+      </c-row>
+
+      <hr class="my-3"/>
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" type="button" (click)="onCloseWidget()">Close</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Add this at the bottom of your template -->
+<!-- <div *ngIf="isUsersWidgetVisible && selectedProject"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 1000px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Manage Project Users: {{ selectedProject.name }}</h3>
+      <button cButton color="secondary" (click)="closeUsersWidget()">Close</button>
+    </div>
+
+
+    <div class="mb-4">
+      <h4>Current Team Members</h4>
+      <div class="table-responsive">
+        <table cTable>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Skills</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of selectedProject.users">
+              <td>
+                <div class="d-flex align-items-center">
+                  <img [src]="user.image" 
+                       [alt]="user.firstName"
+                       class="rounded-circle me-2"
+                       style="width: 30px; height: 30px; object-fit: cover;">
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <div class="d-flex flex-wrap gap-1">
+                  <span *ngFor="let skill of user.skills" 
+                        class="badge bg-info">{{ skill.name }}</span>
+                </div>
+              </td>
+              <td>
+                <button cButton color="danger" size="sm" 
+                        (click)="removeUserFromProject(user._id)">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h4>Add New Team Member</h4>
+      <form [formGroup]="assignmentForm" (ngSubmit)="assignUserToProject()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label cLabel>Select Employee</label>
+            <select cFormControl formControlName="employeeId">
+              <option value="">Select an employee...</option>
+              <option *ngFor="let employee of availableEmployees" 
+                      [value]="employee._id">
+                {{ employee.firstName }} {{ employee.lastName }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label cLabel>Start Date</label>
+            <input cFormControl
+                   type="date"
+                   formControlName="startDate"
+                   [min]="selectedProject.startDate"
+                   [max]="selectedProject.endDate">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label cLabel>End Date</label>
+            <input cFormControl
+                   type="date"
+                   formControlName="endDate"
+                   [min]="selectedProject.startDate"
+                   [max]="selectedProject.endDate">
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button cButton color="primary" 
+                  [disabled]="!assignmentForm.valid"
+                  type="submit">
+            Add to Project
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> -->
+<div *ngIf="isAssignmentsModalOpen && selectedProject"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 1000px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Assignments: {{ selectedProject.name }}</h3>
+      <button cButton color="secondary" (click)="closeAssignmentsModal()">Close</button>
+    </div>
+
+    <!-- Current Assignments Table -->
+    <div class="mb-4">
+   <h4>Current Assignments</h4>
+  <div class="table-responsive">
+    <!-- No assignments message -->
+       <div *ngIf="!selectedProject?.assignments || selectedProject.assignments.length === 0" class="alert alert-info">
+      <i class="cil-info me-2"></i>
+      No assignments found for this project. Use the form below to create new assignments.
+    </div>
+
+    <!-- Assignments table - only show if there are assignments -->
+    <table cTable *ngIf="selectedProject?.assignments && selectedProject.assignments.length > 0">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Period</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+                  <tr *ngFor="let assignment of projectAssignments">
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="assets/images/avatars/1.jpg" 
+                    [alt]="assignment.employee"
+                    class="rounded-circle me-2"
+                    style="width: 30px; height: 30px; object-fit: cover;">
+                <span>{{ assignment.employee }}</span>
+                <small class="text-muted ms-2">({{ assignment.email }})</small>
+              </div>
+            </td>
+            <td>
+              {{ assignment.startDate | date }} - {{ assignment.endDate | date }}
+              <br>
+              <small class="text-muted">Duration: {{ assignment.duration }} days</small>
+            </td>
+            <td>
+              <span class="badge" 
+                    [ngClass]="isAssignmentActive(assignment) ? 'bg-success' : 'bg-secondary'">
+                {{ isAssignmentActive(assignment) ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <button cButton color="danger" size="sm" 
+                      (click)="deleteAssignment(assignment._id)">
+                Remove
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- New Assignment Form -->
+    <div class="mt-4">
+      <h4>Add New Assignment</h4>
+      <form [formGroup]="assignmentForm" (ngSubmit)="createAssignment()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label cLabel>Select User</label>
+         <select cFormControl formControlName="userId">
+            <option value="">Select a user...</option>
+            <option *ngFor="let user of availableUsers" [value]="user._id">
+              {{ user?.firstName }} {{ user?.lastName }}
+            </option>
+          </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label cLabel>Start Date</label>
+            <input cFormControl
+                   type="date"
+                   formControlName="startDate"
+                   [min]="selectedProject.startDate"
+                   [max]="selectedProject.endDate">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label cLabel>End Date</label>
+            <input cFormControl
+                   type="date"
+                   formControlName="endDate"
+                   [min]="selectedProject.startDate"
+                   [max]="selectedProject.endDate">
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button cButton color="primary" 
+                  [disabled]="!assignmentForm.valid"
+                  type="submit">
+            Create Assignment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
  
     </c-card-body>
   </c-card>

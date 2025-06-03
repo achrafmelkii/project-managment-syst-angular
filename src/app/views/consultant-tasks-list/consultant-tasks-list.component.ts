@@ -89,8 +89,6 @@ export class ConsultantTasksListComponent implements OnInit {
 
   readonly headData = ['Titre', 'Project', 'Status', 'Créé à', 'Actions'];
 
-  isCreateModalOpen = false;
-  createTaskForm: FormGroup;
   availableProjects: any[] = [];
   availableEmployees: any[] = [];
 
@@ -116,14 +114,7 @@ export class ConsultantTasksListComponent implements OnInit {
     });
 
     this.loadUserRole();
-    this.createTaskForm = this.fb.group({
-      title: ['', Validators.required],
-      description: ['', Validators.required],
-      project: ['', Validators.required],
-      assignedTo: ['', Validators.required], // Add this field
 
-      status: ['Ouvert', Validators.required],
-    });
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
@@ -180,19 +171,6 @@ export class ConsultantTasksListComponent implements OnInit {
     console.log('User role:', this.userRole);
   }
 
-  openCreateTaskModal(): void {
-    this.isCreateModalOpen = true;
-    this.loadProjects();
-    this.loadEmployees(); // Add this line
-  }
-
-  closeCreateTaskModal(): void {
-    this.isCreateModalOpen = false;
-    this.createTaskForm.reset({
-      status: 'Ouvert',
-    });
-  }
-
   loadProjects(): void {
     this.projectsService.getProjectsList({}).subscribe({
       next: (response) => {
@@ -202,36 +180,6 @@ export class ConsultantTasksListComponent implements OnInit {
         console.error('Error loading projects:', error);
       },
     });
-  }
-
-  createTask(): void {
-    if (this.createTaskForm.valid) {
-      const taskData = {
-        title: this.createTaskForm.value.title,
-        description: this.createTaskForm.value.description,
-        project: this.createTaskForm.value.project,
-        assignedTo: this.createTaskForm.value.assignedTo,
-        status: this.createTaskForm.value.status,
-      };
-
-      this.taskService.createTask(taskData).subscribe({
-        next: (response) => {
-          console.log('Task created successfully:', response);
-          this.loadTasks();
-          this.closeCreateTaskModal();
-        },
-        error: (error) => {
-          console.error('Error creating task:', error);
-        },
-      });
-    } else {
-      Object.keys(this.createTaskForm.controls).forEach((key) => {
-        const control = this.createTaskForm.get(key);
-        if (control?.invalid) {
-          control.markAsTouched();
-        }
-      });
-    }
   }
 
   loadTasks(): void {

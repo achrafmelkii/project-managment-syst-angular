@@ -135,16 +135,19 @@
               </span>
             </td>
             <td>{{ task.createdAt | date }}</td>
-            <td>
-              <div class="d-flex gap-2">
-                <button cButton color="primary" (click)="openTaskModal(task)">
-                  View
-                </button>
-                 <button cButton color="warning" (click)="openEditTaskModal(task)">
-                  Edit
-                </button>
-              </div>
-            </td>
+         <td>
+            <div class="d-flex gap-2">
+              <button cButton color="primary" (click)="openTaskModal(task)">
+                View
+              </button>
+              <button cButton color="warning" (click)="openEditTaskModal(task)">
+                Edit
+              </button>
+              <button cButton color="danger" (click)="deleteTask(task)">
+                Delete
+              </button>
+            </div>
+          </td>
           </tr>
         </tbody>
         <tbody *ngIf="isLoading">
@@ -168,6 +171,34 @@
           Next
         </button>
       </div>
+
+
+
+      
+    <!-- Add this Delete Confirmation Modal at the bottom of your template -->
+    <div *ngIf="isDeleteConfirmationOpen && selectedTask"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+        style="background-color: rgba(0, 0, 0, 0.5); z-index: 1060;">
+      <div class="bg-light p-4 rounded shadow-lg" style="width: 400px; max-width: 95%;">
+        <div class="text-center mb-4">
+          <h4 class="mb-3">Confirm Delete</h4>
+          <p>Are you sure you want to delete the task "<strong>{{ selectedTask.title }}</strong>"?</p>
+          <p class="text-danger small">This action cannot be undone.</p>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2">
+          <button cButton color="secondary" (click)="closeDeleteConfirmation()">
+            Cancel
+          </button>
+          <button cButton color="danger" (click)="confirmDelete()">
+            Delete Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+
 
       <!-- Edit Task Modal -->
 <div *ngIf="isEditModalOpen && selectedTask"
@@ -283,6 +314,15 @@
               <p><strong>Project:</strong> {{ selectedTask?.project?.name }}</p>
               <p><strong>Description:</strong> {{ selectedTask?.description }}</p>
             </div>
+
+            <p><strong>Assigned To:</strong></p>
+        <div class="d-flex align-items-center mb-2" *ngIf="selectedTask?.assignedTo">
+          <img *ngIf="selectedTask?.assignedTo?.image" [src]="selectedTask?.assignedTo?.image" class="rounded-circle me-2" width="32" height="32" alt="Employee Image">
+          <span>{{ selectedTask?.assignedTo?.firstName }} {{ selectedTask?.assignedTo?.lastName }}</span>
+        </div>
+        <div *ngIf="!selectedTask?.assignedTo" class="text-muted">Not assigned to an employee.</div>
+      
+
             <div class="col-md-6 border-start ps-3">
               <p><strong>Created By:</strong></p>
               <div class="d-flex align-items-center mb-2" *ngIf="taskCreator">
@@ -297,7 +337,7 @@
               <p><strong>Created At:</strong> {{ selectedTask?.createdAt | date }}</p>
 
               <div class="mt-3">
-                <label class="form-label">Change Status 11</label>
+                <label class="form-label">Change Status</label>
                 <div class="input-group">
                   <select class="form-select" [(ngModel)]="currentStatus">
                     <option value="Ouvert">Ouvert</option>

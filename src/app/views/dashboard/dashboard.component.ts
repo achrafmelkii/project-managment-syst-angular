@@ -34,6 +34,7 @@ import { IconDirective } from '@coreui/icons-angular';
 import { WidgetsBrandComponent } from '../widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '../widgets/widgets-dropdown/widgets-dropdown.component';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
+import { UserService } from '../../services/user.service';
 
 interface IUser {
   name: string;
@@ -175,9 +176,60 @@ export class DashboardComponent implements OnInit {
     trafficRadio: new FormControl('Month'),
   });
 
+  userStats = {
+    employees: 0,
+    managers: 0,
+    responsibles: 0,
+  };
+
+  // Update the userDistributionChart configuration
+  userDistributionChart: IChartProps = {
+    type: 'bar',
+    data: {
+      labels: ['Employees', 'Managers', 'Responsibles'],
+      datasets: [
+        {
+          label: 'Number of Users',
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+          data: [0, 0, 0],
+        },
+      ],
+    },
+    options: {
+      animation: {
+        duration: 1000,
+        easing: 'easeInOutQuart',
+        delay: (context) => context.dataIndex * 100, //
+      },
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+            precision: 0,
+          },
+          display: true,
+        },
+        x: {
+          display: true,
+        },
+      },
+      responsive: true,
+    },
+  };
+
+  constructor(private userService: UserService) {}
+
   ngOnInit(): void {
     this.initCharts();
     this.updateChartOnColorModeChange();
+    this.loadUserStats();
   }
 
   initCharts(): void {
@@ -193,6 +245,16 @@ export class DashboardComponent implements OnInit {
   handleChartRef($chartRef: any) {
     if ($chartRef) {
       this.mainChartRef.set($chartRef);
+    }
+  }
+
+  // Add a reference to the chart
+  public userDistributionChartRef: any;
+
+  // Add method to handle chart reference
+  handleUserDistributionChartRef($chartRef: any) {
+    if ($chartRef) {
+      this.userDistributionChartRef = $chartRef;
     }
   }
 
@@ -218,6 +280,56 @@ export class DashboardComponent implements OnInit {
         this.mainChartRef().options.scales = { ...options.scales, ...scales };
         this.mainChartRef().update();
       });
+    }
+  }
+
+  loadUserStats(): void {
+    // Load Employees
+    this.userService.getEmployeList({}).subscribe({
+      next: (response) => {
+        this.userStats.employees = response.countUsers || 0;
+        this.updateUserDistributionChart();
+      },
+      error: (err) => console.error('Failed to load employees:', err),
+    });
+
+    // Load Managers
+    this.userService.getManagerList({}).subscribe({
+      next: (response) => {
+        this.userStats.managers = response.countUsers || 0;
+        this.updateUserDistributionChart();
+      },
+      error: (err) => console.error('Failed to load managers:', err),
+    });
+
+    // Load Responsibles (if you have a separate endpoint for this)
+    this.userService.getResponsiblesList({}).subscribe({
+      next: (response) => {
+        this.userStats.responsibles = response.countUsers || 0;
+        this.updateUserDistributionChart();
+      },
+      error: (err) => console.error('Failed to load responsibles:', err),
+    });
+  }
+
+  // Update the updateUserDistributionChart method
+  updateUserDistributionChart(): void {
+    if (
+      this.userDistributionChart.data &&
+      this.userDistributionChart.data.datasets
+    ) {
+      this.userDistributionChart.data.datasets[0].data = [
+        this.userStats.employees,
+        this.userStats.managers,
+        this.userStats.responsibles,
+      ];
+
+      // Force chart update
+      if (this.userDistributionChartRef) {
+        setTimeout(() => {
+          this.userDistributionChartRef.update();
+        });
+      }
     }
   }
 }

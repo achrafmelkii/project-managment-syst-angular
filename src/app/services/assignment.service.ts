@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AssignmentInput } from '../views/calendar/calendar-models'; // Adjust path as needed
+import { ProjectInput } from '../views/calendar/calendar-models';
 
 // Interface for the raw API response if it's paginated or nested
 // If your API directly returns AssignmentInput[], you don't need this.
@@ -12,6 +12,26 @@ export interface AssignmentApiResponse {
   count?: number;
   page?: number;
   pages?: number;
+}
+
+// export interface AssignmentInput {
+//   _id: string;
+//   user: { _id: string; image: string; firstName: string; lastName: string }; // Example: might need user name
+//   project: ProjectInput; // Example: might need project name
+//   startDate: string | Date;
+//   endDate: string | Date;
+//   createdAt: string | Date;
+//   updatedAt: string | Date;
+// }
+
+export interface AssignmentInput {
+  _id: string;
+  employee: string; // This is the formatted "firstName lastName" string
+  email: string;
+  projectName: string;
+  startDate: string;
+  endDate: string;
+  duration: number;
 }
 
 @Injectable({
@@ -27,12 +47,6 @@ export class AssignmentService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  /**
-   * Fetches assignments.
-   * IMPORTANT: Ensure your backend '/api/assignments' endpoint populates
-   * the 'user' and 'project' fields in the assignment documents.
-   * e.g., Assignment.find().populate('user', 'firstName lastName _id').populate('project', 'name _id')
-   */
   getAssignments(params?: any): Observable<AssignmentInput[]> {
     const headers = this.getAuthHeaders();
     // If your API directly returns AssignmentInput[]
@@ -43,17 +57,34 @@ export class AssignmentService {
     //   .pipe(map(response => response.assignments)); // Extract the array
   }
 
+  getUserAssignments(filter: {
+    userId: string;
+    projectId: string;
+  }): Observable<AssignmentInput[]> {
+    const params = new HttpParams()
+      .set('userId', filter.userId)
+      .set('projectId', filter.projectId);
+    return this.http.get<AssignmentInput[]>(`${this.apiUrl}`, { params });
+  }
+
   // Optional: Add other CRUD methods if needed for managing assignments elsewhere
   getAssignmentById(id: string): Observable<AssignmentInput> {
     const headers = this.getAuthHeaders();
     return this.http.get<AssignmentInput>(`${this.apiUrl}/${id}`, { headers });
   }
 
-  createAssignment(
-    assignmentData: Partial<AssignmentInput>
-  ): Observable<AssignmentInput> {
+  getProjectAssignments(projectId: string): Observable<AssignmentInput[]> {
     const headers = this.getAuthHeaders();
-    return this.http.post<AssignmentInput>(this.apiUrl, assignmentData, {
+    return this.http
+      .get<AssignmentApiResponse>(`${this.apiUrl}/project/${projectId}`, {
+        headers,
+      })
+      .pipe(map((response) => response.assignments || []));
+  }
+
+  createAssignment(assignmentData: any): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}`, assignmentData, {
       headers,
     });
   }
@@ -70,8 +101,10 @@ export class AssignmentService {
     );
   }
 
-  deleteAssignment(id: string): Observable<any> {
+  deleteAssignment(id: string): Observable<{ message: string }> {
     const headers = this.getAuthHeaders();
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers });
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers,
+    });
   }
 }

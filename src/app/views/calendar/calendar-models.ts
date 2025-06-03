@@ -1,3 +1,6 @@
+import { AssignmentInput } from '../../services/assignment.service';
+import { Skill } from '../../services/skills.service';
+
 // calendar-models.ts (or directly in your component)
 export interface CalendarEvent {
   id: string; // Or any unique identifier
@@ -13,15 +16,25 @@ export interface CalendarEvent {
 export interface ProjectInput {
   _id: string;
   name: string;
-  startDate: string | Date; // Backend might send as string
-  endDate: string | Date;
-  manager: { _id: string; firstName: string; lastName: string }; // Example: might need manager name
-}
-
-export interface AssignmentInput {
-  _id: string;
-  user: { _id: string; firstName: string; lastName: string }; // Example: might need user name
-  project: { _id: string; name: string }; // Example: might need project name
-  startDate: string | Date;
-  endDate: string | Date;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  assignments: AssignmentInput[]; // Keep if you still use raw IDs for something else
+  requiredSkills: Skill[]; // Updated to expect populated skill objects
+  tasks: any[]; // **Updated to expect populated task objects with title**
+  users: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    image: string;
+    email: string;
+  }[];
+  manager: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    image: string; // Keep if manager also has an image
+  };
+  createdAt: string;
 }

@@ -206,13 +206,17 @@ export class TasksListComponent implements OnInit {
 
   createTask(): void {
     if (this.createTaskForm.valid) {
+      console.log('Form values:', this.createTaskForm.value); // Debug log
+
       const taskData = {
         title: this.createTaskForm.value.title,
         description: this.createTaskForm.value.description,
         project: this.createTaskForm.value.project,
         assignedTo: this.createTaskForm.value.assignedTo,
-        status: this.createTaskForm.value.status,
+        status: this.createTaskForm.value.status || 'Ouvert',
       };
+
+      console.log('Sending task data:', taskData); // Debug log
 
       this.taskService.createTask(taskData).subscribe({
         next: (response) => {
@@ -221,13 +225,26 @@ export class TasksListComponent implements OnInit {
           this.closeCreateTaskModal();
         },
         error: (error) => {
-          console.error('Error creating task:', error);
+          console.error('Error details:', error);
+
+          // Show user-friendly error message
+          let errorMessage = 'Failed to create task. ';
+          if (error.error?.message) {
+            errorMessage += error.error.message;
+          } else {
+            errorMessage += 'Please try again later.';
+          }
+
+          // You might want to show this in your UI
+          alert(errorMessage);
         },
       });
     } else {
+      console.log('Form invalid:', this.createTaskForm.errors); // Debug log
       Object.keys(this.createTaskForm.controls).forEach((key) => {
         const control = this.createTaskForm.get(key);
         if (control?.invalid) {
+          console.log(`Invalid field ${key}:`, control.errors); // Debug log
           control.markAsTouched();
         }
       });
@@ -352,6 +369,35 @@ export class TasksListComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Add this property to the class
+  isDeleteConfirmationOpen = false;
+
+  // Add these methods
+  deleteTask(task: Task): void {
+    this.selectedTask = task;
+    this.isDeleteConfirmationOpen = true;
+  }
+
+  confirmDelete(): void {
+    if (this.selectedTask?._id) {
+      this.taskService.deleteTask(this.selectedTask._id).subscribe({
+        next: () => {
+          console.log('Task deleted successfully');
+          this.loadTasks();
+          this.closeDeleteConfirmation();
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+        },
+      });
+    }
+  }
+
+  closeDeleteConfirmation(): void {
+    this.isDeleteConfirmationOpen = false;
+    this.selectedTask = null;
   }
 
   getStatusColor(status: string | undefined): string {

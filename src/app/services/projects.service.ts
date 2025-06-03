@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ProjectInput } from '../views/calendar/calendar-models';
+
+export interface UsersApiResponse {
+  users: any[];
+  countUsers: number;
+  page: number;
+  pages: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +24,68 @@ export class ProjectsService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
+  getManagerProjectsList(filter: {
+    name: string;
+    page: number;
+  }): Observable<ProjectInput> {
+    let params = new HttpParams();
+    if (filter.name) {
+      params = params.set('name', filter.name);
+    }
+    params = params.set('page', filter.page.toString());
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<ProjectInput>(`${this.apiUrl}/manager/projects`, {
+      headers,
+      params,
+    }); // Example endpoint
+  }
+
+  // Used in AddUserToProjectModal
+  getEmployeListForProject(filter: {
+    page: number;
+    pageSize: number;
+    projectId: string;
+  }): Observable<UsersApiResponse> {
+    let params = new HttpParams()
+      .set('page', filter.page.toString())
+      .set('pageSize', filter.pageSize.toString());
+
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<UsersApiResponse>(
+      `${this.apiUrl}/employe/${filter.projectId}`,
+      { headers, params }
+    );
+  }
+
+  // Used in AddUserToProjectModal & AssignmentModal
+  addUsersToProject(payload: {
+    _id: string;
+    users?: string[];
+    user?: string;
+  }): Observable<any> {
+    // The React code has two forms: one with `users: string[]` and one with `user: string`
+    // You might need two separate methods or a backend that handles both.
+    // Assuming the backend handles a payload with an array `users`.
+    const body = {
+      users: payload.users || (payload.user ? [payload.user] : []),
+    };
+    return this.http.post(
+      `${this.apiUrl}/projects/${payload._id}/assign-users`,
+      body
+    );
+  }
+
+  // Used in AddUserToProjectModal
+  deleteUserFromProject(payload: {
+    _id: string;
+    userId: string;
+  }): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/projects/${payload._id}/users/${payload.userId}`
+    );
+  }
   getEmployeProjectsList(
     page: number = 1,
     pageSize: number = 10 // Make sure pageSize is also passed if you want to control it
@@ -42,6 +112,9 @@ export class ProjectsService {
       params = params.set('page', filter.page.toString());
     }
 
+    // Add populate parameter if your backend supports it
+    params = params.set('populate', 'users,manager,requiredSkills,tasks');
+
     return this.http.get(`${this.apiUrl}`, { params, headers });
   }
 
@@ -64,8 +137,10 @@ export class ProjectsService {
   }
 
   // Delete a Project
-  deleteProject(id: string): Observable<any> {
+  deleteProject(id: string): Observable<{ message: string }> {
     const headers = this.getAuthHeaders();
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers });
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers,
+    });
   }
 }

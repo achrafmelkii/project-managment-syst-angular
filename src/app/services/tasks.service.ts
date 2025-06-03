@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 
 export interface Task {
   _id: string;
@@ -26,7 +26,13 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
 }
-
+export interface CreateTaskRequest {
+  title: string;
+  description: string;
+  project: string;
+  assignedTo: string;
+  status: 'Ouvert' | 'En cours' | 'Complété';
+}
 export interface TaskResponse {
   tasksCount: number;
   tasks: Task[];
@@ -91,17 +97,68 @@ export class TasksService {
     });
   }
 
-  // Create new task
-  createTask(task: {
-    title: string;
-    description: string;
-    project: string;
-    assignedTo: string;
-  }): Observable<{ message: string }> {
+  createTask(
+    task: CreateTaskRequest
+  ): Observable<{ message: string; task: Task }> {
     const headers = this.getAuthHeaders();
 
-    return this.http.post<{ message: string }>(this.apiUrl, task, { headers });
+    // Validate data before sending
+    if (!task.title || !task.description || !task.project || !task.assignedTo) {
+      return throwError(() => new Error('Missing required fields'));
+    }
+
+    const requestBody = {
+      title: task.title.trim(),
+      description: task.description.trim(),
+      project: task.project,
+      assignedTo: task.assignedTo,
+      status: task.status || 'Ouvert',
+    };
+
+    console.log('Sending request with body:', requestBody);
+
+    return this.http
+      .post<{ message: string; task: Task }>(this.apiUrl, requestBody, {
+        headers,
+      })
+      .pipe(
+        catchError((error) => {
+          console.error('Task creation error:', error);
+          if (error.error?.message) {
+            return throwError(() => new Error(error.error.message));
+          }
+          return throwError(() => new Error('Failed to create task'));
+        })
+      );
   }
+
+  // Create new task
+  // createTask(task: {
+  //   title: string;
+  //   description: string;
+  //   project: string;
+  //   assignedTo: string;
+  //   status: string;
+  // }): Observable<any> {
+  //   const headers = this.getAuthHeaders();
+  //   console.log('Creating task with data:', task); // Debug log
+
+  //   return this.http
+  //     .post<{ message: string }>(
+  //       this.apiUrl,
+  //       {
+  //         ...task,
+  //         status: task.status || 'Ouvert', // Ensure status is set
+  //       },
+  //       { headers }
+  //     )
+  //     .pipe(
+  //       catchError((error) => {
+  //         console.error('Task creation error details:', error);
+  //         return throwError(() => error);
+  //       })
+  //     );
+  // }
 
   // Update task
   updateTask(

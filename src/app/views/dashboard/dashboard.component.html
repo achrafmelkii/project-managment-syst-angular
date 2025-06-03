@@ -1,4 +1,47 @@
+<!-- user distribution -->
+<c-card class="mb-4 mt-4">
+  <c-card-header>
+    User Distribution
+  </c-card-header>
+  <c-card-body>
+    <c-row>
+      <c-col sm="12">
+        <h4 class="card-title mb-0">Distribution of Users by Role</h4>
+        <div class="small text-body-secondary">Current Statistics</div>
+      </c-col>
+    </c-row>
+    
+    <c-chart
+      [data]="userDistributionChart.data"
+      [height]="300"
+      [options]="userDistributionChart.options"
+      [type]="userDistributionChart.type"
+      (chartRef)="handleUserDistributionChartRef($event)">
+      User distribution chart
+    </c-chart>
+  </c-card-body>
+  <c-card-footer>
+    <c-row class="text-center" [xs]="1" [sm]="3">
+      <c-col>
+        <div class="text-body-secondary">Employees</div>
+        <div class="fw-semibold">{{ userStats.employees }}</div>
+      </c-col>
+      <c-col>
+        <div class="text-body-secondary">Managers</div>
+        <div class="fw-semibold">{{ userStats.managers }}</div>
+      </c-col>
+      <c-col>
+        <div class="text-body-secondary">Responsibles</div>
+        <div class="fw-semibold">{{ userStats.responsibles }}</div>
+      </c-col>
+    </c-row>
+  </c-card-footer>
+</c-card>
+
+
 <app-widgets-dropdown />
+
+ <!-- graphs  -->
 <!-- <c-card class="my-4">
   <c-card-body>
     <c-row>
@@ -108,6 +151,8 @@
     </c-row>
   </c-card-footer>
 </c-card> -->
+
+
 <!-- 
 <app-widgets-brand [withCharts]="true" /> -->
 
@@ -392,4 +437,5 @@
       </c-card-body>
     </c-card>
   </c-col>
-</c-row> -->
+</c-row>
+-->

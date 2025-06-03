@@ -29,6 +29,7 @@ import {
 import { AuthService } from '../../../services/auth.service';
 import { routes } from '../routes';
 import { CommonModule } from '@angular/common'; // Add this import
+import { TasksService } from '../../../services/tasks.service';
 
 @Component({
   selector: 'app-widgets-dropdown',
@@ -59,6 +60,7 @@ export class WidgetsDropdownComponent implements OnInit {
     private userService: UserService,
     private projectService: ProjectsService,
     private authService: AuthService,
+    private tasksService: TasksService,
     private router: Router
   ) {}
 
@@ -66,6 +68,10 @@ export class WidgetsDropdownComponent implements OnInit {
   totalProjects: number = 0;
   totalManagers: number = 0;
   totalEmployees: number = 0;
+
+  totalTasksObservable: number = 0;
+  completedTasks: number = 0;
+
   data: any[] = [];
   options: any[] = [];
   labels = [
@@ -100,12 +106,44 @@ export class WidgetsDropdownComponent implements OnInit {
       console.log('User is not authenticated');
       this.router.navigate(['/login']);
     }
-
+    this.loadUserRole();
     this.fetchUsersCount();
     this.fetchManagersCount();
     this.fetchEmployeesCount();
     this.fetchProjectsCount();
-    this.loadUserRole();
+    this.loadTasksCount();
+  }
+
+  loadTasksCount() {
+    if (this.isEmployee) {
+      this.tasksService.getAssignedTasks().subscribe({
+        next: (response) => {
+          this.totalTasksObservable = response.tasks.length || 0;
+          this.completedTasks = response.tasks.filter(
+            (task) => task.status === 'Complété'
+          ).length;
+          console.log('Completed tasks for employee:', this.completedTasks);
+          console.log('Total tasks for employee:', this.totalTasksObservable);
+        },
+        error: (error) => {
+          console.error('Failed to fetch tasks for employee:', error);
+        },
+      });
+    } else {
+      this.tasksService.getMyTasks().subscribe({
+        next: (response) => {
+          this.totalTasksObservable = response.tasks.length || 0;
+          this.completedTasks = response.tasks.filter(
+            (task) => task.status === 'Complété'
+          ).length;
+          console.log('Completed tasks for manager:', this.completedTasks);
+          console.log('Total tasks for manager:', this.totalTasksObservable);
+        },
+        error: (error) => {
+          console.error('Failed to fetch tasks for manager:', error);
+        },
+      });
+    }
   }
 
   loadUserRole() {
@@ -115,15 +153,27 @@ export class WidgetsDropdownComponent implements OnInit {
   }
 
   fetchProjectsCount() {
-    this.projectService.getProjectsList({}).subscribe({
-      next: (response) => {
-        this.totalProjects = response.projectsUsers || 0;
-        console.log('Total projects:', this.totalProjects);
-      },
-      error: (error) => {
-        console.error('Failed to fetch projects:', error);
-      },
-    });
+    if (this.isEmployee) {
+      this.projectService.getEmployeProjectsList().subscribe({
+        next: (response) => {
+          this.totalProjects = response.projectsUsers || 0;
+          console.log('Total employee projects:', this.totalProjects);
+        },
+        error: (error) => {
+          console.error('Failed to fetch employee projects:', error);
+        },
+      });
+    } else {
+      this.projectService.getProjectsList({}).subscribe({
+        next: (response) => {
+          this.totalProjects = response.projectsUsers || 0;
+          console.log('Total projects (non employee):', this.totalProjects);
+        },
+        error: (error) => {
+          console.error('Failed to fetch projects:', error);
+        },
+      });
+    }
   }
 
   fetchUsersCount() {
