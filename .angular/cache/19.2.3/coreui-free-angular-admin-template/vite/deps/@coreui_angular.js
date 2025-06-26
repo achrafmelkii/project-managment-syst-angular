@@ -1,4 +1,12 @@
 import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterModule
+} from "./chunk-4HFYVSMA.js";
+import {
   AnimationBuilder,
   animate,
   animateChild,
@@ -12,9 +20,6 @@ import {
   useAnimation
 } from "./chunk-B5OA6MLV.js";
 import {
-  IconDirective
-} from "./chunk-KDJ2ZSNT.js";
-import {
   Platform,
   _bindEventWithOptions,
   _getEventTarget,
@@ -24,19 +29,14 @@ import {
   coerceElement,
   coerceNumberProperty,
   normalizePassiveListenerOptions
-} from "./chunk-VB4P4KMK.js";
+} from "./chunk-IAQYTOCA.js";
 import {
   takeUntilDestroyed,
   toObservable
 } from "./chunk-OZJ3UN6Q.js";
 import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterModule
-} from "./chunk-4HFYVSMA.js";
+  IconDirective
+} from "./chunk-KDJ2ZSNT.js";
 import "./chunk-PLL7GVWM.js";
 import "./chunk-VCHRZW6F.js";
 import {

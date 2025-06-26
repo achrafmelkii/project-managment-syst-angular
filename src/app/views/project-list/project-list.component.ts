@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ProjectsService } from '../../services/projects.service';
-import { Observable, Subscription } from 'rxjs';
+import { UserService } from '../../services/user.service';
+import { Observable, of, Subscription, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common'; // 👈 Needed for *ngIf, *ngFor, date pipe, ngClass
 import {
   FormBuilder,
@@ -110,7 +111,8 @@ export class ProjectListComponent implements OnInit, OnDestroy {
 
   constructor(
     private projectService: ProjectsService,
-    private skillsService: SkillsService, // Inject SkillsService
+    private skillsService: SkillsService,
+    private userService: UserService,
     private fb: FormBuilder,
     private assignmentService: AssignmentService // Add this
   ) {
@@ -304,42 +306,130 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   loadAvailableUsers(): void {
-    if (this.selectedProject?._id) {
-      this.projectService
-        .getEmployeListForProject({
-          page: 1,
-          pageSize: 100,
-          projectId: this.selectedProject._id,
-        })
-        .subscribe({
-          next: (response) => {
-            this.availableUsers = response.users || [];
-          },
-          error: (err) => console.error('Failed to load users:', err),
-        });
-    }
+    // No longer needs a project ID. Fetches all users.
+    this.userService.getEmployeList({ page: 1}) // Fetch a large number to get all
+      .subscribe({
+        next: (response) => {
+          // Assuming the response object has a 'users' property
+          this.availableUsers = response.users || [];
+          console.log('Loaded ALL available users for dropdown:', this.availableUsers);
+        },
+        error: (err) => {
+          console.error('Failed to load all users:', err);
+          this.availableUsers = [];
+        },
+      });
   }
 
+
+
+  // was getting users from the projectusers list, but now we will load all users
+  // loadAvailableUsers(): void {
+  //   if (this.selectedProject?._id) {
+  //     this.projectService
+  //       .getEmployeListForProject({
+  //         page: 1,
+  //         pageSize: 100,
+  //         projectId: this.selectedProject._id,
+  //       })
+  //       .subscribe({
+  //         next: (response) => {
+  //           this.availableUsers = response.users || [];
+  //         },
+  //         error: (err) => console.error('Failed to load users:', err),
+  //       });
+  //   }
+  // }
+
+  // createAssignment(): void {
+  //   if (this.assignmentForm.valid && this.selectedProject) {
+  //     const formValue = this.assignmentForm.value;
+
+  //     const assignmentData = {
+  //       startDate: formValue.startDate,
+  //       endDate: formValue.endDate,
+  //       userId: formValue.userId,
+  //       projectId: `${this.selectedProject._id}`, // Ensure project ID is a string
+  //     };
+  //     console.log('this.selectedProject._id:', this.selectedProject._id);
+
+  //     this.assignmentService.createAssignment(assignmentData).subscribe({
+  //       next: () => {
+  //         this.loadProjectAssignments();
+  //         this.assignmentForm.reset();
+  //       },
+  //       error: (err) => console.error('Failed to create assignment:', err),
+  //     });
+  //   }
+  // }
+
   createAssignment(): void {
-    if (this.assignmentForm.valid && this.selectedProject) {
-      const formValue = this.assignmentForm.value;
-
-      const assignmentData = {
-        startDate: formValue.startDate,
-        endDate: formValue.endDate,
-        userId: formValue.userId,
-        projectId: `${this.selectedProject._id}`, // Ensure project ID is a string
-      };
-      console.log('this.selectedProject._id:', this.selectedProject._id);
-
-      this.assignmentService.createAssignment(assignmentData).subscribe({
-        next: () => {
-          this.loadProjectAssignments();
-          this.assignmentForm.reset();
-        },
-        error: (err) => console.error('Failed to create assignment:', err),
-      });
+    if (!this.assignmentForm.valid || !this.selectedProject) {
+      return;
     }
+  
+    const formValue = this.assignmentForm.value;
+    const selectedUserId = formValue.userId;
+    const projectId = this.selectedProject._id;
+  
+    const isMember = this.selectedProject.users.some(
+      (member) => member._id === selectedUserId
+    );
+
+    let preAssignmentTask$: Observable<any>;
+  
+    if (!isMember) {
+      // If not a member, the task is to add the user to the project
+      console.log(`User ${selectedUserId} is not a member. Adding to project...`);
+      preAssignmentTask$ = this.projectService.addUsersToProject({
+        _id: projectId,
+        users: [selectedUserId], 
+      });
+    } else {
+      // If already a member, the task is to do nothing and proceed immediately
+      console.log(`User ${selectedUserId} is already a member.`);
+      preAssignmentTask$ = of(null); // 'of(null)' creates an observable that just completes
+    }
+  
+    // Step 3: Chain the tasks. The assignment creation runs only after the pre-task is done.
+    preAssignmentTask$.pipe(
+      switchMap(() => {
+        // This part runs after the user has been added (or if they were already a member)
+        const assignmentData = {
+          startDate: formValue.startDate,
+          endDate: formValue.endDate,
+          userId: selectedUserId,
+          projectId: projectId,
+        };
+        console.log('Proceeding to create assignment:', assignmentData);
+        return this.assignmentService.createAssignment(assignmentData);
+      })
+    ).subscribe({
+      next: (newAssignment) => {
+        console.log('Assignment created successfully!');
+        
+        // --- UI & Data Refresh ---
+        // A. If the user was newly added, update the local project data to reflect it.
+        // This avoids a full page reload.
+        if (!isMember) {
+          const newUser = this.availableUsers.find(u => u._id === selectedUserId);
+          if (newUser) {
+            this.selectedProject?.users.push(newUser);
+          }
+        }
+        
+        // B. Refresh the list of assignments in the modal
+        this.loadProjectAssignments(); 
+        
+        // C. Reset the form for the next entry
+        this.assignmentForm.reset();
+      },
+      error: (err) => {
+        console.error('An error occurred during the assignment process:', err);
+        // You can add user-facing error feedback here
+        alert(`Error: ${err.error?.message || 'Failed to create assignment.'}`);
+      }
+    });
   }
 
   deleteAssignment(assignmentId: string): void {

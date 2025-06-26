@@ -38,8 +38,8 @@ interface Project {
   _id: string;
   name: string;
   description: string;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   status: string;
   assignments: string[];
   requiredSkills: string[]; // This should be an array of skill IDs after transformation
@@ -211,26 +211,38 @@ export class ManagerProjectListComponent implements OnInit, OnDestroy {
     this.subscriptions.push(projectsSub);
   }
 
-  onViewProject(project: Project) {
-    // Create a deep copy for editing to avoid modifying the original list object
-    this.selectedProject = JSON.parse(JSON.stringify(project));
+onViewProject(project: Project) {
+  // Create a deep copy for editing to avoid modifying the original list object
+  this.selectedProject = JSON.parse(JSON.stringify(project));
 
-    if (this.selectedProject) {
-      // Ensure manager is an ID for ngModel binding in the edit form
-      if (
-        typeof this.selectedProject.manager === 'object' &&
-        this.selectedProject.manager !== null
-      ) {
-        this.selectedProject.manager = this.selectedProject.manager._id;
-      }
-      // Ensure requiredSkills is an array of skill IDs
-      this.selectedProject.requiredSkills =
-        project.requiredSkills?.map((skill: any) =>
-          typeof skill === 'string' ? skill : skill._id
-        ) || [];
+  if (this.selectedProject) {
+    // Ensure manager is an ID for ngModel binding in the edit form
+    if (
+      typeof this.selectedProject.manager === 'object' &&
+      this.selectedProject.manager !== null
+    ) {
+      this.selectedProject.manager = this.selectedProject.manager._id;
     }
-    this.isEditWidgetVisible = true;
+    // Ensure requiredSkills is an array of skill IDs
+    this.selectedProject.requiredSkills =
+      project.requiredSkills?.map((skill: any) =>
+        typeof skill === 'string' ? skill : skill._id
+      ) || [];
+
+    // Convert date fields to YYYY-MM-DD string for input[type="date"]
+    const toDateInputString = (date: any) => {
+      if (!date) return '';
+      const d = new Date(date);
+      // Pad month and day with leading zeros
+      const month = ('0' + (d.getMonth() + 1)).slice(-2);
+      const day = ('0' + d.getDate()).slice(-2);
+      return `${d.getFullYear()}-${month}-${day}`;
+    };
+    this.selectedProject.startDate = toDateInputString(this.selectedProject.startDate) as any;
+    this.selectedProject.endDate = toDateInputString(this.selectedProject.endDate) as any;
   }
+  this.isEditWidgetVisible = true;
+}
 
   onCloseWidget() {
     this.selectedProject = null;

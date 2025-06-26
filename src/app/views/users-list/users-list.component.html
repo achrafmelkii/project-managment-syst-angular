@@ -37,95 +37,130 @@
         </tbody>
       </table>
 
-      
-      <div *ngIf="isEditWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
-        <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
-          <h3>Edit User</h3>
-          <form cForm>
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilUser"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="selectedUser.firstName" name="firstName" placeholder="firstName" />
-            </c-input-group>
 
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilUser"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="selectedUser.lastName" name="lastName" placeholder="lastName" />
-            </c-input-group>
-      
-            <c-input-group class="mb-3">
-              <span cInputGroupText>&#64;</span>
-              <input cFormControl [(ngModel)]="selectedUser.email" name="email" placeholder="Email" />
-            </c-input-group>
-      
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilLockLocked"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="selectedUser.role" name="role" placeholder="role" />
-            </c-input-group>
-      
-            <div class="d-flex justify-content-end gap-2">
-              <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
-              <button cButton color="success" (click)="onSaveChanges()" type="button">Save</button>
-            </div>
-          </form>
-        </div>
+
+<!-- Edit User Modal -->
+<div *ngIf="isEditWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
+    <h3>Edit User</h3>
+    <form cForm>
+      <c-row class="mb-3">
+        <label cLabel for="editFirstName" class="d-block mb-2 fw-semibold">First Name</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilUser"></svg>
+          </span>
+          <input cFormControl id="editFirstName" [(ngModel)]="selectedUser.firstName" name="firstName" placeholder="First Name" />
+        </c-input-group>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel for="editLastName" class="d-block mb-2 fw-semibold">Last Name</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilUser"></svg>
+          </span>
+          <input cFormControl id="editLastName" [(ngModel)]="selectedUser.lastName" name="lastName" placeholder="Last Name" />
+        </c-input-group>
+      </c-row>
+
+      <c-row class="mb-3">
+        <label cLabel for="editEmail" class="d-block mb-2 fw-semibold">Email</label>
+        <c-input-group>
+          <span cInputGroupText>&#64;</span>
+          <input cFormControl id="editEmail" [(ngModel)]="selectedUser.email" name="email" placeholder="Email" />
+        </c-input-group>
+      </c-row>
+
+  <c-row class="mb-3">
+  <label cLabel for="editRole" class="d-block mb-2 fw-semibold">Role</label>
+  <c-input-group>
+    <span cInputGroupText>
+      <svg cIcon name="cilBriefcase"></svg>
+    </span>
+    <select cSelect id="editRole" [(ngModel)]="selectedUser.role" name="role" required>
+      <option value="" disabled>Select Role</option>
+      <option value="employee">employee</option>
+      <option value="responsible">Responsible</option>
+      <option value="manager">manager</option>
+    </select>
+  </c-input-group>
+</c-row>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
+        <button cButton color="success" (click)="onSaveChanges()" type="button">Save</button>
       </div>
-      
+    </form>
+  </div>
+</div>
 
-      <div *ngIf="isCreateWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
-        <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
-          <h3>Create New User</h3>
-          <form cForm>
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilUser"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="newUser.firstName" name="firstName" placeholder="First Name" required />
-            </c-input-group>
+<!-- Create User Modal -->
+<div *ngIf="isCreateWidgetVisible" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 1050;">
+  <div class="bg-light p-4 rounded shadow-lg" style="width: 600px; max-width: 90%;">
+    <h3>Create New User</h3>
+    <form cForm>
+      <c-row class="mb-3">
+        <label cLabel for="createFirstName" class="d-block mb-2 fw-semibold">First Name</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilUser"></svg>
+          </span>
+          <input cFormControl id="createFirstName" [(ngModel)]="newUser.firstName" name="firstName" placeholder="First Name" required />
+        </c-input-group>
+      </c-row>
 
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilUser"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="newUser.lastName" name="lastName" placeholder="Last Name" required />
-            </c-input-group>
+      <c-row class="mb-3">
+        <label cLabel for="createLastName" class="d-block mb-2 fw-semibold">Last Name</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilUser"></svg>
+          </span>
+          <input cFormControl id="createLastName" [(ngModel)]="newUser.lastName" name="lastName" placeholder="Last Name" required />
+        </c-input-group>
+      </c-row>
 
-            <c-input-group class="mb-3">
-              <span cInputGroupText>&#64;</span>
-              <input cFormControl [(ngModel)]="newUser.email" name="email" placeholder="Email" type="email" required />
-            </c-input-group>
+      <c-row class="mb-3">
+        <label cLabel for="createEmail" class="d-block mb-2 fw-semibold">Email</label>
+        <c-input-group>
+          <span cInputGroupText>&#64;</span>
+          <input cFormControl id="createEmail" [(ngModel)]="newUser.email" name="email" placeholder="Email" type="email" required />
+        </c-input-group>
+      </c-row>
 
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilLockLocked"></svg>
-              </span>
-              <input cFormControl [(ngModel)]="newUser.password" name="password" placeholder="Password" type="password" required />
-            </c-input-group>
+      <c-row class="mb-3">
+        <label cLabel for="createPassword" class="d-block mb-2 fw-semibold">Password</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilLockLocked"></svg>
+          </span>
+          <input cFormControl id="createPassword" [(ngModel)]="newUser.password" name="password" placeholder="Password" type="password" required />
+        </c-input-group>
+      </c-row>
 
-            <c-input-group class="mb-3">
-              <span cInputGroupText>
-                <svg cIcon name="cilBriefcase"></svg>
-              </span>
-              <select cSelect [(ngModel)]="newUser.role" name="role" required>
-                <option value="" disabled>Select Role</option>
-                <option value="employee">employee</option>
-                <option value="responsible">Responsible</option>
-                <option value="manager">manager</option>
-              </select>
-            </c-input-group>
+      <c-row class="mb-3">
+        <label cLabel for="createRole" class="d-block mb-2 fw-semibold">Role</label>
+        <c-input-group>
+          <span cInputGroupText>
+            <svg cIcon name="cilBriefcase"></svg>
+          </span>
+          <select cSelect id="createRole" [(ngModel)]="newUser.role" name="role" required>
+            <option value="" disabled>Select Role</option>
+            <option value="employee">employee</option>
+            <option value="responsible">Responsible</option>
+            <option value="manager">manager</option>
+          </select>
+        </c-input-group>
+      </c-row>
 
-            <div class="d-flex justify-content-end gap-2">
-              <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
-              <button cButton color="success"  (click)="createUser()">Create</button>
-            </div>
-          </form>
-        </div>
+      <div class="d-flex justify-content-end gap-2">
+        <button cButton color="secondary" (click)="onCloseWidget()" type="button">Cancel</button>
+        <button cButton color="success" (click)="createUser()">Create</button>
       </div>
+    </form>
+  </div>
+</div>
+
 
     </c-card-body>
   </c-card>

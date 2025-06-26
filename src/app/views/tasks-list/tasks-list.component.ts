@@ -94,6 +94,8 @@ export class TasksListComponent implements OnInit {
   availableProjects: any[] = [];
   availableEmployees: any[] = [];
 
+isLoadingUsers = false;
+
   taskCreator: any = null;
 
   isEditModalOpen = false;
@@ -103,15 +105,14 @@ export class TasksListComponent implements OnInit {
     private taskService: TasksService,
     private authService: AuthService,
     private projectsService: ProjectsService,
-    private userService: UserService, // Add this
-
+    private userService: UserService,
     private fb: FormBuilder
   ) {
     this.editTaskForm = this.fb.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
       project: [{ value: '', disabled: true }],
-      assignedTo: ['', Validators.required],
+      assignedTo: [{ value: '', disabled: true }, Validators.required],
       status: ['', Validators.required],
     });
 
@@ -120,7 +121,7 @@ export class TasksListComponent implements OnInit {
       title: ['', Validators.required],
       description: ['', Validators.required],
       project: ['', Validators.required],
-      assignedTo: ['', Validators.required], // Add this field
+      assignedTo: [{ value: '', disabled: true }, Validators.required],
 
       status: ['Ouvert', Validators.required],
     });
@@ -133,22 +134,70 @@ export class TasksListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTasks();
+        this.setupProjectChangeListeners();
+
   }
 
-  openEditTaskModal(task: Task): void {
+// **NEW METHOD**: Central place to set up the dynamic dropdown logic
+  setupProjectChangeListeners(): void {
+    // Listener for the CREATE form
+    this.createTaskForm.get('project')?.valueChanges.subscribe(projectId => {
+      this.onProjectSelected(projectId, this.createTaskForm);
+    });
+
+    // Listener for the EDIT form
+    this.editTaskForm.get('project')?.valueChanges.subscribe(projectId => {
+      this.onProjectSelected(projectId, this.editTaskForm);
+    });
+  }
+
+  // **NEW METHOD**: The logic to run when a project is selected
+  onProjectSelected(projectId: string, form: FormGroup): void {
+    const assignedToControl = form.get('assignedTo');
+    
+    // Reset the user selection and the list of users
+    this.availableEmployees = [];
+    assignedToControl?.reset({ value: '', disabled: true });
+
+    if (projectId) {
+      this.isLoadingUsers = true;
+      this.projectsService.getUsersForProject(projectId).subscribe({
+        next: (users) => {
+          this.availableEmployees = users;
+          assignedToControl?.enable(); // Enable the dropdown
+          this.isLoadingUsers = false;
+        },
+        error: (err) => {
+          console.error('Failed to load users for project', err);
+          this.isLoadingUsers = false;
+        }
+      });
+    }
+  }
+
+
+ openEditTaskModal(task: Task): void {
     this.selectedTask = task;
     this.isEditModalOpen = true;
-    this.loadProjects();
-    this.loadEmployees();
+    this.loadProjects(); // Keep this to populate the project list
 
-    // Populate form with task data
+    // Populate the form
     this.editTaskForm.patchValue({
       title: task.title,
       description: task.description,
       project: task.project?._id,
-      assignedTo: task.assignedTo?._id,
       status: task.status,
     });
+
+    // Manually trigger the fetch for the users of the initially selected project
+    if (task.project?._id) {
+      this.onProjectSelected(task.project._id, this.editTaskForm);
+      // Set the assignedTo value *after* the users have been loaded
+      // A small delay helps ensure the list is populated before setting the value
+      setTimeout(() => {
+        this.editTaskForm.get('assignedTo')?.setValue(task.assignedTo?._id);
+      }, 200);
+    }
   }
 
   closeEditTaskModal(): void {
@@ -156,18 +205,7 @@ export class TasksListComponent implements OnInit {
     this.selectedTask = null;
     this.editTaskForm.reset();
   }
-  // Add this method to load employees
-  loadEmployees(): void {
-    this.userService.getEmployeList({}).subscribe({
-      next: (response) => {
-        this.availableEmployees = response.users;
-        console.log('Loaded employees:', this.availableEmployees);
-      },
-      error: (error) => {
-        console.error('Error loading employees:', error);
-      },
-    });
-  }
+
 
   onSearch(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -183,7 +221,6 @@ export class TasksListComponent implements OnInit {
   openCreateTaskModal(): void {
     this.isCreateModalOpen = true;
     this.loadProjects();
-    this.loadEmployees(); // Add this line
   }
 
   closeCreateTaskModal(): void {

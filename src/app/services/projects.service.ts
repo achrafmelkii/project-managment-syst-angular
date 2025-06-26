@@ -24,6 +24,12 @@ export class ProjectsService {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
+  getUsersForProject(projectId: string): Observable<any[]> {
+  const headers = this.getAuthHeaders();
+  // Call the new backend endpoint
+  return this.http.get<any[]>(`${this.apiUrl}/${projectId}/users`, { headers });
+}
+
   getManagerProjectsList(filter: {
     name: string;
     page: number;
@@ -65,25 +71,29 @@ export class ProjectsService {
     users?: string[];
     user?: string;
   }): Observable<any> {
-    // The React code has two forms: one with `users: string[]` and one with `user: string`
-    // You might need two separate methods or a backend that handles both.
-    // Assuming the backend handles a payload with an array `users`.
+   
+        const headers = this.getAuthHeaders(); 
+
     const body = {
       users: payload.users || (payload.user ? [payload.user] : []),
     };
     return this.http.post(
-      `${this.apiUrl}/projects/${payload._id}/assign-users`,
-      body
+      `${this.apiUrl}/${payload._id}`,
+      body,
+       { headers }
     );
   }
 
-  // Used in AddUserToProjectModal
+
   deleteUserFromProject(payload: {
     _id: string;
     userId: string;
   }): Observable<any> {
+    const headers = this.getAuthHeaders();
+
     return this.http.delete(
-      `${this.apiUrl}/projects/${payload._id}/users/${payload.userId}`
+      `${this.apiUrl}/${payload._id}/users/${payload.userId}`,
+      { headers } 
     );
   }
   getEmployeProjectsList(

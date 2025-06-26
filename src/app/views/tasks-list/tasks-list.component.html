@@ -48,6 +48,23 @@
     </div>
   </div>
 
+     <div class="mb-3">
+        <label cLabel for="project">Project</label>
+        <select cFormControl
+                id="project"
+                formControlName="project"
+                [ngClass]="{'is-invalid': createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched}">
+          <option value="">Select a project</option>
+          <option *ngFor="let project of availableProjects" [value]="project._id">
+            {{project.name}}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched">
+          Project is required
+        </div>
+      </div>
+
+
     <!-- Employee Assignment Field -->
   <div class="mb-3">
     <label cLabel for="assignedTo">Assign To Employee</label>
@@ -65,22 +82,7 @@
     </div>
   </div>
 
-      <div class="mb-3">
-        <label cLabel for="project">Project</label>
-        <select cFormControl
-                id="project"
-                formControlName="project"
-                [ngClass]="{'is-invalid': createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched}">
-          <option value="">Select a project</option>
-          <option *ngFor="let project of availableProjects" [value]="project._id">
-            {{project.name}}
-          </option>
-        </select>
-        <div class="invalid-feedback" *ngIf="createTaskForm.get('project')?.invalid && createTaskForm.get('project')?.touched">
-          Project is required
-        </div>
-      </div>
-
+ 
       <div class="mb-3">
         <label cLabel for="description">Description</label>
         <textarea cFormControl
